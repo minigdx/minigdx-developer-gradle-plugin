@@ -9,9 +9,13 @@ import com.github.minigdx.gradle.plugin.internal.Severity
 import com.github.minigdx.gradle.plugin.internal.Solution
 import org.gradle.api.Plugin
 import org.gradle.api.Project
+import org.gradle.api.publish.PublishingExtension
+import org.gradle.api.publish.maven.MavenPublication
+import org.gradle.jvm.tasks.Jar
 import org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension
 import java.io.File
 import java.io.IOException
+import java.net.URI
 
 /**
  * Plugin for developers of MiniGDX project.
@@ -27,8 +31,10 @@ class MiniGdxDeveloperGradlePlugin : Plugin<Project> {
         configureProjectVersionAndGroupId(project)
         configureProjectRepository(project)
         configureKotlinMultiplatform(project)
-        // TODO: Configure Publication
+        configureDokka(project)
+        configurePublication(project)
 
+        // TODO: Configure android
         // TODO: Configure tasks for local deploy, ...
 
         configureLinter(project)
@@ -45,6 +51,29 @@ class MiniGdxDeveloperGradlePlugin : Plugin<Project> {
 
         project.version = version
         project.group = "com.github.minigdx"
+    }
+
+    private fun configurePublication(project: Project) {
+        project.apply { it.plugin("maven-publish") }
+        project.afterEvaluate {
+            project.extensions.configure(PublishingExtension::class.java) {
+                it.publications.forEach {
+                    val publication = it as? MavenPublication
+                    publication?.artifact(project.tasks.getByName("javadocJar"))
+                }
+
+            }
+
+        }
+    }
+
+    private fun configureDokka(project: Project) {
+        project.apply { it.plugin("org.jetbrains.dokka") }
+        project.tasks.register("javadocJar", Jar::class.java) {
+            it.dependsOn(project.tasks.getByName("dokka"))
+            it.archiveClassifier.set("javadoc")
+            it.from(project.buildDir.resolve("dokka"))
+        }
     }
 
     private fun configureProjectRepository(project: Project) {

@@ -36,6 +36,7 @@ dependencies {
 
     implementation("org.jetbrains.kotlin.multiplatform:org.jetbrains.kotlin.multiplatform.gradle.plugin:1.3.70")
     implementation("org.jlleitschuh.gradle.ktlint:org.jlleitschuh.gradle.ktlint.gradle.plugin:9.2.1")
+    implementation("org.jetbrains.dokka:org.jetbrains.dokka.gradle.plugin:0.10.1")
 
     implementation(platform("me.champeau.jdoctor:jdoctor-bom:0.1"))
     implementation("me.champeau.jdoctor:jdoctor-core")
