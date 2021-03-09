@@ -151,7 +151,7 @@ class MiniGdxDeveloperGradlePlugin : Plugin<Project> {
                 writeBytes(content.readBytes())
             }
         }
-        project.rootProject.tasks.register("createGithubWorkflow") {
+        project.rootProject.tasks.register("createGithubWorkflows") {
             it.group = "minigdx-dev"
             it.doLast {
                 val target = it.project.mkdir(".github/workflows")
