@@ -58,13 +58,39 @@ class MinigdxGradlePluginFunctionalTest {
         val runner = GradleRunner.create()
         runner.forwardOutput()
         runner.withPluginClasspath()
-        runner.withArguments("createGithubWorkflow")
+        runner.withArguments("createGithubWorkflows")
         runner.withProjectDir(projectDir)
         val result = runner.build()
 
         // Verify the result
-        assertEquals(TaskOutcome.SUCCESS, result.task(":createGithubWorkflow")?.outcome)
+        assertEquals(TaskOutcome.SUCCESS, result.task(":createGithubWorkflows")?.outcome)
         val fileCreated = projectDir.resolve(".github/workflows/build.yml").exists()
+        assertTrue(fileCreated)
+    }
+
+
+    @Test fun `can create makefile`() {
+        // Setup the test build
+        val projectDir = temporaryFolder.newFolder("build", "functionalTest")
+        projectDir.mkdirs()
+        projectDir.resolve("settings.gradle").writeText("")
+        projectDir.resolve("build.gradle").writeText("""
+            plugins {
+                id('com.github.minigdx.gradle.plugin.developer')
+            }
+        """)
+
+        // Run the build
+        val runner = GradleRunner.create()
+        runner.forwardOutput()
+        runner.withPluginClasspath()
+        runner.withArguments("createMakefile")
+        runner.withProjectDir(projectDir)
+        val result = runner.build()
+
+        // Verify the result
+        assertEquals(TaskOutcome.SUCCESS, result.task(":createMakefile")?.outcome)
+        val fileCreated = projectDir.resolve("Makefile").exists()
         assertTrue(fileCreated)
     }
 }

@@ -8,7 +8,7 @@ of all different projects.
 
 The plugin configure for you:
 
-- Kotlin multiplaform
+- Kotlin multiplatform
 - group of the project
 - version of the project
 - github workflow
@@ -19,3 +19,4 @@ The plugin configure for you:
 The plugin tasks into your project:
 
 - `createGithubWorkflows` : create default file for GitHub Actions
+- `createMakefile` : create default Makefile

@@ -17,6 +17,7 @@ class MiniGdxDeveloperGradlePluginTest {
         project.plugins.apply("com.github.minigdx.gradle.plugin.developer")
 
         // Verify the result
-        assertNotNull(project.tasks.findByName("createGithubWorkflow"))
+        assertNotNull(project.tasks.findByName("createGithubWorkflows"))
+        assertNotNull(project.tasks.findByName("createMakefile"))
     }
 }

@@ -3,10 +3,15 @@
  */
 package com.github.minigdx.gradle.plugin
 
+import com.github.minigdx.gradle.plugin.internal.MiniGdxException
+import com.github.minigdx.gradle.plugin.internal.MiniGdxException.Companion.ISSUES
+import com.github.minigdx.gradle.plugin.internal.Severity
+import com.github.minigdx.gradle.plugin.internal.Solution
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension
 import java.io.File
+import java.io.IOException
 
 /**
  * Plugin for developers of MiniGDX project.
@@ -26,8 +31,8 @@ class MiniGdxDeveloperGradlePlugin : Plugin<Project> {
 
         // TODO: Configure tasks for local deploy, ...
 
-        // TODO: Configure linter
-
+        configureLinter(project)
+        configureMakefile(project)
         configureGithubWorkflow(project)
     }
 
@@ -143,20 +148,51 @@ class MiniGdxDeveloperGradlePlugin : Plugin<Project> {
         }
     }
 
-    private fun configureGithubWorkflow(project: Project) {
-        fun copy(filename: String, target: File) {
-            val content = classLoader.getResourceAsStream("github/workflow/$filename")!!
-            target.resolve(filename).apply {
-                createNewFile()
-                writeBytes(content.readBytes())
-            }
+    private fun configureLinter(project: Project) {
+        project.apply { it.plugin("org.jlleitschuh.gradle.ktlint") }
+    }
+
+    private fun copy(project: Project, filename: String, target: File) {
+        val content = classLoader.getResourceAsStream(filename) ?: throw MiniGdxException.create(
+            severity = Severity.GRAVE,
+            project = project,
+            because = "'$filename' file not found in the plugin jar! The plugin might have been incorrectly packaged.",
+            description = "The plugin is trying to copy a resource that should has been packaged into the plugin " +
+                "but is not. As this file is required, the plugin will stop.",
+            solutions = listOf(Solution("An issue can be reported to the developer", ISSUES))
+        )
+        target.resolve(File(filename).name).apply {
+            println(this.absolutePath)
+            if(!exists()) createNewFile()
+            writeBytes(content.readBytes())
         }
+    }
+
+    private fun configureGithubWorkflow(project: Project) {
         project.rootProject.tasks.register("createGithubWorkflows") {
             it.group = "minigdx-dev"
             it.doLast {
-                val target = it.project.mkdir(".github/workflows")
-                copy("build.yml", target)
-                copy("publish-release.yml", target)
+                try {
+
+                val target = it.project.projectDir.resolve(".github/workflows")
+                if(!target.exists()) {
+                    it.project.mkdir(".github/workflows")
+                }
+                copy(project, "github/workflows/build.yml", target)
+                copy(project, "github/workflows/publish-release.yml", target)
+                } catch (ex: IOException) {
+                    ex.printStackTrace()
+                }
+            }
+        }
+    }
+
+    private fun configureMakefile(project: Project) {
+        project.rootProject.tasks.register("createMakefile") {
+            it.group = "minigdx-dev"
+            it.doLast {
+                val target = it.project.projectDir
+                copy(project, "Makefile", target)
             }
         }
     }
