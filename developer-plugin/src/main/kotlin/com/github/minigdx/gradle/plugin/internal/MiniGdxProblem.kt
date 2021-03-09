@@ -79,6 +79,7 @@ data class Context(val project: Project, val severity: Severity) {
                 JVM version: '${System.getProperty("java.version")}'
                 JVM name: '${System.getProperty("java.vendor")}'
                 Gradle version: '${project.gradle.gradleVersion}'
+                Plugin version: '${this::class.java.getPackage().implementationVersion}' 
                 """
         }
     }
