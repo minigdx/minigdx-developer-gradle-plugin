@@ -7,6 +7,9 @@
  */
 
 plugins {
+    // Plugin publication plugin.
+    id("com.gradle.plugin-publish") version "0.13.0"
+
     // Apply the Java Gradle plugin development plugin to add support for developing Gradle plugins
     `java-gradle-plugin`
 
@@ -48,6 +51,22 @@ gradlePlugin {
     }
 }
 
+pluginBundle {
+    website = "https://github.com/minigdx/minigdx-gradle-plugin"
+    vcsUrl = "https://github.com/minigdx/minigdx-gradle-plugin"
+
+    (plugins) {
+        // first plugin
+        "developer" {
+            // id is captured from java-gradle-plugin configuration
+            displayName = "MiniGDX Developer plugin"
+            description = """Configure MiniGDX libs with a common set of configuration and tasks.
+                | The usage is mainly for MiniGDX contributors.
+            """.trimMargin()
+            tags = listOf("minigdx", "developer")
+        }
+    }
+}
 // Add a source set for the functional test suite
 val functionalTestSourceSet = sourceSets.create("functionalTest") {
 }
