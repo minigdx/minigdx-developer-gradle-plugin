@@ -8,4 +8,4 @@
  */
 
 rootProject.name = "minigdx-gradle-plugin"
-include("plugin")
+include("developer-plugin")
