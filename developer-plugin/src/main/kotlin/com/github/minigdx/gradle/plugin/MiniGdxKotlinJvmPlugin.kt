@@ -34,6 +34,7 @@ class MiniGdxKotlinJvmPlugin : Plugin<Project> {
         project.dependencies.add("api", project.dependencies.platform("org.jetbrains.kotlin:kotlin-bom"))
         project.dependencies.add("implementation", "org.jetbrains.kotlin:kotlin-stdlib-jdk8")
         project.dependencies.add("implementation", "org.jetbrains.kotlin:kotlin-reflect")
+        project.dependencies.add("testImplementation", "org.jetbrains.kotlin:kotlin-test-junit")
 
         project.plugins.withId("java-test-fixtures") {
             project.dependencies.add("testFixturesImplementation", "org.jetbrains.kotlin:kotlin-stdlib-jdk8")

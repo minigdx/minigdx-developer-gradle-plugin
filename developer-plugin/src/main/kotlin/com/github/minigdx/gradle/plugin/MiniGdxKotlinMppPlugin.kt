@@ -49,32 +49,6 @@ class MiniGdxKotlinMppPlugin : Plugin<Project> {
                 }
             }
 
-            mpp.mingwX64 {
-                binaries {
-                    staticLib { }
-                    sharedLib { }
-                }
-            }
-            mpp.linuxX64 {
-                binaries {
-                    staticLib { }
-                    sharedLib { }
-                }
-
-            }
-            mpp.ios {
-                binaries {
-                    staticLib { }
-                    sharedLib { }
-                }
-            }
-            mpp.macosX64 {
-                binaries {
-                    staticLib { }
-                    sharedLib { }
-                }
-            }
-
             mpp.sourceSets.apply {
                 getByName("commonMain") {
                     it.dependencies {

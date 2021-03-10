@@ -96,6 +96,10 @@ class MiniGdxDeveloperPlugin : Plugin<Project> {
     }
 
     private fun configureGithubWorkflow(project: Project) {
+        // The task is already registered
+        if(project.rootProject.tasks.findByName("createGithubWorkflows") != null) {
+            return
+        }
         project.rootProject.tasks.register("createGithubWorkflows") {
             it.group = "minigdx-dev"
             it.doLast {
@@ -115,6 +119,10 @@ class MiniGdxDeveloperPlugin : Plugin<Project> {
     }
 
     private fun configureMakefile(project: Project) {
+        // The task is already registered
+        if(project.rootProject.tasks.findByName("createGithubWorkflows") != null) {
+            return
+        }
         project.rootProject.tasks.register("createMakefile") {
             it.group = "minigdx-dev"
             it.doLast {
