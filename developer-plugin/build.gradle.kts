@@ -53,7 +53,17 @@ gradlePlugin {
     // Define the plugin
     val developer by plugins.creating {
         id = "com.github.minigdx.gradle.plugin.developer"
-        implementationClass = "com.github.minigdx.gradle.plugin.MiniGdxDeveloperGradlePlugin"
+        implementationClass = "com.github.minigdx.gradle.plugin.MiniGdxDeveloperPlugin"
+    }
+
+    val mpp by plugins.creating {
+        id = "com.github.minigdx.gradle.plugin.developer.mpp"
+        implementationClass = "com.github.minigdx.gradle.plugin.MiniGdxKotlinMppPlugin"
+    }
+
+    val jvm by plugins.creating {
+        id = "com.github.minigdx.gradle.plugin.developer.jvm"
+        implementationClass = "com.github.minigdx.gradle.plugin.MiniGdxKotlinJvmPlugin"
     }
 }
 
@@ -70,6 +80,22 @@ pluginBundle {
                 | The usage is mainly for MiniGDX contributors.
             """.trimMargin()
             tags = listOf("minigdx", "developer")
+        }
+
+        "jvm" {
+            displayName = "MiniGDX Kotlin JVM Developer plugin"
+            description = """Configure MiniGDX libs to build for the JVM only.
+                | The usage is mainly for MiniGDX contributors.
+            """.trimMargin()
+            tags = listOf("minigdx", "developer", "kotlin", "jvm")
+        }
+
+        "mpp" {
+            displayName = "MiniGDX Kotlin Multiplatform Developer plugin"
+            description = """Configure MiniGDX libs to build for different platforms.
+                | The usage is mainly for MiniGDX contributors.
+            """.trimMargin()
+            tags = listOf("minigdx", "developer", "kotlin", "jvm", "mpp", "ios", "js", "android", "native")
         }
     }
 }

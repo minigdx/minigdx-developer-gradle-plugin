@@ -12,10 +12,8 @@ import org.gradle.api.Project
 import org.gradle.api.publish.PublishingExtension
 import org.gradle.api.publish.maven.MavenPublication
 import org.gradle.jvm.tasks.Jar
-import org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension
 import java.io.File
 import java.io.IOException
-import java.net.URI
 
 /**
  * Plugin for developers of MiniGDX project.
@@ -23,20 +21,15 @@ import java.net.URI
  * It configures plugins used in the project that are commons to all projects
  * like the publication, kotlin version, ...
  */
-class MiniGdxDeveloperGradlePlugin : Plugin<Project> {
+class MiniGdxDeveloperPlugin : Plugin<Project> {
 
-    private val classLoader = MiniGdxDeveloperGradlePlugin::class.java.classLoader
+    private val classLoader = MiniGdxDeveloperPlugin::class.java.classLoader
 
     override fun apply(project: Project) {
         configureProjectVersionAndGroupId(project)
         configureProjectRepository(project)
-        configureKotlinMultiplatform(project)
         configureDokka(project)
         configurePublication(project)
-
-        // TODO: Configure android
-        // TODO: Configure tasks for local deploy, ...
-
         configureLinter(project)
         configureMakefile(project)
         configureGithubWorkflow(project)
@@ -80,101 +73,6 @@ class MiniGdxDeveloperGradlePlugin : Plugin<Project> {
         project.repositories.mavenCentral()
         project.repositories.google()
         project.repositories.mavenLocal()
-    }
-
-    private fun configureKotlinMultiplatform(project: Project) {
-        project.apply { it.plugin("org.jetbrains.kotlin.multiplatform") }
-        project.extensions.configure<KotlinMultiplatformExtension>("kotlin") { mpp ->
-            mpp.js {
-                this.useCommonJs()
-                this.browser {
-                    this.webpackTask {
-                        this.compilation.kotlinOptions {
-                            this.sourceMap = true
-                            this.sourceMapEmbedSources = "always"
-                        }
-                    }
-                }
-                this.nodejs
-            }
-
-            mpp.jvm {
-                this.compilations.getByName("main").kotlinOptions.jvmTarget = "1.8"
-                this.compilations.getByName("test").kotlinOptions.jvmTarget = "1.8"
-            }
-
-            project.plugins.withId("com.android.library") {
-                mpp.android {
-                    publishLibraryVariants("release", "debug")
-                }
-            }
-
-            mpp.mingwX64 {
-                binaries {
-                    staticLib { }
-                    sharedLib { }
-                }
-            }
-            mpp.linuxX64 {
-                binaries {
-                    staticLib { }
-                    sharedLib { }
-                }
-
-            }
-            mpp.ios {
-                binaries {
-                    staticLib { }
-                    sharedLib { }
-                }
-            }
-            mpp.macosX64 {
-                binaries {
-                    staticLib { }
-                    sharedLib { }
-                }
-            }
-
-            mpp.sourceSets.apply {
-                getByName("commonMain") {
-                    it.dependencies {
-                        implementation(kotlin("stdlib-common"))
-                    }
-                }
-
-                getByName("commonTest") {
-                    it.dependencies {
-                        implementation(kotlin("test-common"))
-                        implementation(kotlin("test-annotations-common"))
-                    }
-                }
-
-                getByName("jsMain") {
-                    it.dependencies {
-                        implementation(kotlin("stdlib-js"))
-                    }
-                }
-
-                getByName("jsTest") {
-                    it.dependencies {
-                        implementation(kotlin("test-js"))
-                    }
-                }
-
-                getByName("jvmMain") {
-                    it.dependencies {
-                        implementation(kotlin("stdlib-jdk8"))
-                    }
-                }
-
-                getByName("jvmTest") {
-                    it.dependencies {
-                        implementation(kotlin("test-junit"))
-                    }
-                }
-
-            }
-        }
     }
 
     private fun configureLinter(project: Project) {

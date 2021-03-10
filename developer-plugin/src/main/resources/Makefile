@@ -9,5 +9,5 @@ deploy:
 	./gradlew publishToMavenLocal
 
 test:
-	./gradlew allTest
+	./gradlew test
 
