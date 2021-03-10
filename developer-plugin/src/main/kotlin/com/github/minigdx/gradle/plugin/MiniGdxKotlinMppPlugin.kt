@@ -16,9 +16,14 @@ class MiniGdxKotlinMppPlugin : Plugin<Project> {
     }
 
     private fun configureTestTask(project: Project) {
-        project.tasks.create("test") {
-            it.group = "verification"
-            it.dependsOn("allTests")
+        project.afterEvaluate {
+            if (project.rootProject.tasks.findByName("test") != null) {
+                return@afterEvaluate
+            }
+            project.tasks.register("test") {
+                it.group = "verification"
+                it.dependsOn("allTests")
+            }
         }
     }
 
@@ -87,8 +92,20 @@ class MiniGdxKotlinMppPlugin : Plugin<Project> {
                     }
                 }
 
+                project.plugins.withId("com.android.library") {
+                    getByName("androidMain") {
+                        it.dependencies {
+                            implementation(kotlin("stdlib-jdk8"))
+                        }
+                    }
+
+                    getByName("androidTest") {
+                        it.dependencies {
+                            implementation(kotlin("test-junit"))
+                        }
+                    }
+                }
             }
         }
     }
-
 }
