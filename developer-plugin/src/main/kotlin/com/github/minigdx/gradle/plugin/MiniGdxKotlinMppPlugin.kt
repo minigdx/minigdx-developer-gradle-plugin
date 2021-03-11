@@ -37,6 +37,8 @@ class MiniGdxKotlinMppPlugin : Plugin<Project> {
                         this.compilation.kotlinOptions {
                             this.sourceMap = true
                             this.sourceMapEmbedSources = "always"
+                            this.freeCompilerArgs += listOf("-Xopt-in=kotlin.ExperimentalStdlibApi")
+
                         }
                     }
                 }
@@ -44,8 +46,14 @@ class MiniGdxKotlinMppPlugin : Plugin<Project> {
             }
 
             mpp.jvm {
-                this.compilations.getByName("main").kotlinOptions.jvmTarget = "1.8"
-                this.compilations.getByName("test").kotlinOptions.jvmTarget = "1.8"
+                this.compilations.getByName("main").kotlinOptions.apply {
+                    jvmTarget = "1.8"
+                    freeCompilerArgs += listOf("-Xopt-in=kotlin.ExperimentalStdlibApi")
+                }
+                this.compilations.getByName("test").kotlinOptions.apply {
+                    jvmTarget = "1.8"
+                    freeCompilerArgs += listOf("-Xopt-in=kotlin.ExperimentalStdlibApi")
+                }
             }
 
             project.plugins.withId("com.android.library") {
@@ -104,6 +112,15 @@ class MiniGdxKotlinMppPlugin : Plugin<Project> {
                             implementation(kotlin("test-junit"))
                         }
                     }
+                }
+            }
+        }
+
+        project.afterEvaluate {
+            project.tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile::class.java).all {
+                it.kotlinOptions {
+                    jvmTarget = "1.8"
+                    freeCompilerArgs += listOf("-Xopt-in=kotlin.ExperimentalStdlibApi")
                 }
             }
         }

@@ -68,8 +68,8 @@ gradlePlugin {
 }
 
 pluginBundle {
-    website = "https://github.com/minigdx/minigdx-gradle-plugin"
-    vcsUrl = "https://github.com/minigdx/minigdx-gradle-plugin"
+    website = "https://github.com/minigdx/minigdx-developer-gradle-plugin"
+    vcsUrl = "https://github.com/minigdx/minigdx-developer-gradle-plugin"
 
     (plugins) {
         // first plugin
