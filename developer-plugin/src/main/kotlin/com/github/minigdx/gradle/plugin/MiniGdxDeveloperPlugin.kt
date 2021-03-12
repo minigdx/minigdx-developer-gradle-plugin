@@ -12,6 +12,7 @@ import org.gradle.api.Project
 import org.gradle.api.publish.PublishingExtension
 import org.gradle.api.publish.maven.MavenPublication
 import org.gradle.jvm.tasks.Jar
+import org.gradle.plugins.signing.SigningExtension
 import java.io.File
 import java.io.IOException
 
@@ -33,6 +34,8 @@ class MiniGdxDeveloperPlugin : Plugin<Project> {
         configureLinter(project)
         configureMakefile(project)
         configureGithubWorkflow(project)
+
+        configureSonatype(project)
     }
 
     private fun configureProjectVersionAndGroupId(project: Project) {
@@ -131,6 +134,20 @@ class MiniGdxDeveloperPlugin : Plugin<Project> {
                 val target = it.project.projectDir
                 copy(project, "Makefile", target)
             }
+        }
+    }
+
+    private fun configureSonatype(project: Project) {
+        if(project.properties["signing.base64.secretKey"] == null) {
+            return
+        }
+        project.apply { it.plugin("org.gradle.signing") }
+        project.extensions.configure(SigningExtension::class.java) {
+            it.sign(project.extensions.getByType(PublishingExtension::class.java).publications)
+            it.useInMemoryPgpKeys(
+                project.properties["signing.base64.secretKey"].toString(),
+                project.properties["signing.password"].toString()
+            )
         }
     }
 
