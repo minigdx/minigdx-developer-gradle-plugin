@@ -10,13 +10,14 @@ import kotlin.test.assertNotNull
 /**
  * A simple unit test for the 'com.github.minigdx.gradle.plugin.greeting' plugin.
  */
-class MiniGdxDeveloperGradlePluginTest {
+class MiniGdxDeveloperPluginTest {
     @Test fun `plugin registers task`() {
         // Create a test project and apply the plugin
         val project = ProjectBuilder.builder().build()
         project.plugins.apply("com.github.minigdx.gradle.plugin.developer")
 
         // Verify the result
-        assertNotNull(project.tasks.findByName("createGithubWorkflow"))
+        assertNotNull(project.tasks.findByName("createGithubWorkflows"))
+        assertNotNull(project.tasks.findByName("createMakefile"))
     }
 }

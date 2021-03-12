@@ -35,6 +35,12 @@ dependencies {
     implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
 
     implementation("org.jetbrains.kotlin.multiplatform:org.jetbrains.kotlin.multiplatform.gradle.plugin:1.3.70")
+    implementation("org.jlleitschuh.gradle.ktlint:org.jlleitschuh.gradle.ktlint.gradle.plugin:9.2.1")
+    implementation("org.jetbrains.dokka:org.jetbrains.dokka.gradle.plugin:0.10.1")
+
+    implementation(platform("me.champeau.jdoctor:jdoctor-bom:0.1"))
+    implementation("me.champeau.jdoctor:jdoctor-core")
+    implementation("me.champeau.jdoctor:jdoctor-utils:0.1")
 
     // Use the Kotlin test library.
     testImplementation("org.jetbrains.kotlin:kotlin-test")
@@ -47,13 +53,23 @@ gradlePlugin {
     // Define the plugin
     val developer by plugins.creating {
         id = "com.github.minigdx.gradle.plugin.developer"
-        implementationClass = "com.github.minigdx.gradle.plugin.MiniGdxDeveloperGradlePlugin"
+        implementationClass = "com.github.minigdx.gradle.plugin.MiniGdxDeveloperPlugin"
+    }
+
+    val mpp by plugins.creating {
+        id = "com.github.minigdx.gradle.plugin.developer.mpp"
+        implementationClass = "com.github.minigdx.gradle.plugin.MiniGdxKotlinMppPlugin"
+    }
+
+    val jvm by plugins.creating {
+        id = "com.github.minigdx.gradle.plugin.developer.jvm"
+        implementationClass = "com.github.minigdx.gradle.plugin.MiniGdxKotlinJvmPlugin"
     }
 }
 
 pluginBundle {
-    website = "https://github.com/minigdx/minigdx-gradle-plugin"
-    vcsUrl = "https://github.com/minigdx/minigdx-gradle-plugin"
+    website = "https://github.com/minigdx/minigdx-developer-gradle-plugin"
+    vcsUrl = "https://github.com/minigdx/minigdx-developer-gradle-plugin"
 
     (plugins) {
         // first plugin
@@ -65,8 +81,28 @@ pluginBundle {
             """.trimMargin()
             tags = listOf("minigdx", "developer")
         }
+
+        "jvm" {
+            displayName = "MiniGDX Kotlin JVM Developer plugin"
+            description = """Configure MiniGDX libs to build for the JVM only.
+                | The usage is mainly for MiniGDX contributors.
+            """.trimMargin()
+            tags = listOf("minigdx", "developer", "kotlin", "jvm")
+        }
+
+        "mpp" {
+            displayName = "MiniGDX Kotlin Multiplatform Developer plugin"
+            description = """Configure MiniGDX libs to build for different platforms.
+                | The usage is mainly for MiniGDX contributors.
+            """.trimMargin()
+            tags = listOf("minigdx", "developer", "kotlin", "jvm", "mpp", "ios", "js", "android", "native")
+        }
     }
 }
+
+val compileKotlin: org.jetbrains.kotlin.gradle.tasks.KotlinCompile by tasks
+compileKotlin.kotlinOptions.jvmTarget = "1.8"
+
 // Add a source set for the functional test suite
 val functionalTestSourceSet = sourceSets.create("functionalTest") {
 }

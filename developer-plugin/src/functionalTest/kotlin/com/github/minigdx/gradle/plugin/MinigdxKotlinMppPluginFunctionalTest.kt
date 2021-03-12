@@ -15,7 +15,7 @@ import kotlin.test.assertTrue
 /**
  * A simple functional test for the 'com.github.minigdx.gradle.plugin.greeting' plugin.
  */
-class MinigdxGradlePluginFunctionalTest {
+class MinigdxKotlinMppPluginFunctionalTest {
 
     @get:Rule
     val temporaryFolder: TemporaryFolder = TemporaryFolder()
@@ -27,7 +27,7 @@ class MinigdxGradlePluginFunctionalTest {
         projectDir.resolve("settings.gradle").writeText("")
         projectDir.resolve("build.gradle").writeText("""
             plugins {
-                id('com.github.minigdx.gradle.plugin.developer')
+                id('com.github.minigdx.gradle.plugin.developer.mpp')
             }
         """)
 
@@ -41,30 +41,5 @@ class MinigdxGradlePluginFunctionalTest {
 
         // Verify the result
         assertEquals(TaskOutcome.SUCCESS, result.task(":build")?.outcome)
-    }
-
-    @Test fun `can create github workflow`() {
-        // Setup the test build
-        val projectDir = temporaryFolder.newFolder("build", "functionalTest")
-        projectDir.mkdirs()
-        projectDir.resolve("settings.gradle").writeText("")
-        projectDir.resolve("build.gradle").writeText("""
-            plugins {
-                id('com.github.minigdx.gradle.plugin.developer')
-            }
-        """)
-
-        // Run the build
-        val runner = GradleRunner.create()
-        runner.forwardOutput()
-        runner.withPluginClasspath()
-        runner.withArguments("createGithubWorkflow")
-        runner.withProjectDir(projectDir)
-        val result = runner.build()
-
-        // Verify the result
-        assertEquals(TaskOutcome.SUCCESS, result.task(":createGithubWorkflow")?.outcome)
-        val fileCreated = projectDir.resolve(".github/workflows/build.yml").exists()
-        assertTrue(fileCreated)
     }
 }
