@@ -102,6 +102,7 @@ class MiniGdxDeveloperPlugin : Plugin<Project> {
         }
         project.rootProject.tasks.register("createGithubWorkflows") {
             it.group = "minigdx-dev"
+            it.description = "Copy default Github workflows inside this project."
             it.doLast {
                 try {
 
@@ -120,11 +121,12 @@ class MiniGdxDeveloperPlugin : Plugin<Project> {
 
     private fun configureMakefile(project: Project) {
         // The task is already registered
-        if(project.rootProject.tasks.findByName("createGithubWorkflows") != null) {
+        if(project.rootProject.tasks.findByName("createMakefile") != null) {
             return
         }
         project.rootProject.tasks.register("createMakefile") {
             it.group = "minigdx-dev"
+            it.description = "Copy default Makefile inside this project."
             it.doLast {
                 val target = it.project.projectDir
                 copy(project, "Makefile", target)
