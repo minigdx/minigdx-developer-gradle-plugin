@@ -20,7 +20,7 @@ plugins {
 }
 
 group = "com.github.minigdx"
-version = "1.0-SNAPSHOT"
+version = project.properties["version"] ?: "1.0-SNAPSHOT"
 
 repositories {
     gradlePluginPortal()
