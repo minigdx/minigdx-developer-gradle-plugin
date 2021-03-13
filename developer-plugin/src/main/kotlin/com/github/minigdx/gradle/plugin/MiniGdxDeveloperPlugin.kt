@@ -27,6 +27,7 @@ class MiniGdxDeveloperPlugin : Plugin<Project> {
     private val classLoader = MiniGdxDeveloperPlugin::class.java.classLoader
 
     override fun apply(project: Project) {
+        project.extensions.create("minigdxDeveloper", MiniGdxDeveloperExtension::class.java, project)
         configureProjectVersionAndGroupId(project)
         configureProjectRepository(project)
         configureDokka(project)
@@ -52,14 +53,43 @@ class MiniGdxDeveloperPlugin : Plugin<Project> {
     private fun configurePublication(project: Project) {
         project.apply { it.plugin("maven-publish") }
         project.afterEvaluate {
+            val ext = project.extensions.getByType(MiniGdxDeveloperExtension::class.java)
             project.extensions.configure(PublishingExtension::class.java) {
-                it.publications.forEach {
-                    val publication = it as? MavenPublication
-                    publication?.artifact(project.tasks.getByName("javadocJar"))
+                // Configure publication (what to publish)
+                it.publications.withType(MavenPublication::class.java).configureEach {
+                    it.artifact(project.tasks.getByName("javadocJar"))
+
+                    it.pom {
+                        it.name.set(ext.name)
+                        it.description.set(ext.description)
+                        it.licenses {
+                            it.license {
+                                it.name.set(ext.licence.name)
+                                it.url.set(ext.licence.url)
+                            }
+                        }
+                        it.url.set(ext.projectUrl)
+                        it.issueManagement {
+                            it.system.set("Github")
+                            it.url.set(ext.projectUrl.map { url -> "$url/issues" })
+                        }
+                        it.scm {
+                            it.connection.set(ext.projectUrl.map { url -> "$url/.git" })
+                            it.url.set(ext.projectUrl)
+                        }
+                        it.developers { spec ->
+                            ext.developers.forEach { dev ->
+                                spec.developer {
+                                    it.name.set(dev.name)
+                                    it.email.set(dev.email)
+                                    it.url.set(dev.url)
+                                }
+                            }
+                        }
+
+                    }
                 }
-
             }
-
         }
     }
 
@@ -93,14 +123,14 @@ class MiniGdxDeveloperPlugin : Plugin<Project> {
         )
         target.resolve(File(filename).name).apply {
             println(this.absolutePath)
-            if(!exists()) createNewFile()
+            if (!exists()) createNewFile()
             writeBytes(content.readBytes())
         }
     }
 
     private fun configureGithubWorkflow(project: Project) {
         // The task is already registered
-        if(project.rootProject.tasks.findByName("createGithubWorkflows") != null) {
+        if (project.rootProject.tasks.findByName("createGithubWorkflows") != null) {
             return
         }
         project.rootProject.tasks.register("createGithubWorkflows") {
@@ -109,12 +139,12 @@ class MiniGdxDeveloperPlugin : Plugin<Project> {
             it.doLast {
                 try {
 
-                val target = it.project.projectDir.resolve(".github/workflows")
-                if(!target.exists()) {
-                    it.project.mkdir(".github/workflows")
-                }
-                copy(project, "github/workflows/build.yml", target)
-                copy(project, "github/workflows/publish-release.yml", target)
+                    val target = it.project.projectDir.resolve(".github/workflows")
+                    if (!target.exists()) {
+                        it.project.mkdir(".github/workflows")
+                    }
+                    copy(project, "github/workflows/build.yml", target)
+                    copy(project, "github/workflows/publish-release.yml", target)
                 } catch (ex: IOException) {
                     ex.printStackTrace()
                 }
@@ -124,7 +154,7 @@ class MiniGdxDeveloperPlugin : Plugin<Project> {
 
     private fun configureMakefile(project: Project) {
         // The task is already registered
-        if(project.rootProject.tasks.findByName("createMakefile") != null) {
+        if (project.rootProject.tasks.findByName("createMakefile") != null) {
             return
         }
         project.rootProject.tasks.register("createMakefile") {
@@ -138,12 +168,34 @@ class MiniGdxDeveloperPlugin : Plugin<Project> {
     }
 
     private fun configureSonatype(project: Project) {
-        if(project.properties["signing.base64.secretKey"] == null) {
+        if (project.properties["signing.base64.secretKey"] == null) {
             return
         }
         project.apply { it.plugin("org.gradle.signing") }
+        val publications = project.extensions.getByType(PublishingExtension::class.java).publications
+        project.extensions.getByType(PublishingExtension::class.java).repositories {
+            // Configure where to publish
+            it.maven {
+                it.name = "sonatypeStaging"
+                it.setUrl("https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/")
+                it.credentials {
+                    it.username = project.properties["sonatype.username"].toString()
+                    it.password = project.properties["sonatype.password"].toString()
+                }
+            }
+
+            it.maven {
+                it.name = "snapshotSonatypeStaging"
+                it.setUrl("https://s01.oss.sonatype.org/content/repositories/snapshots/")
+                it.credentials {
+                    it.username = project.properties["sonatype.username"].toString()
+                    it.password = project.properties["sonatype.password"].toString()
+                }
+            }
+        }
+
         project.extensions.configure(SigningExtension::class.java) {
-            it.sign(project.extensions.getByType(PublishingExtension::class.java).publications)
+            it.sign(publications)
             it.useInMemoryPgpKeys(
                 project.properties["signing.base64.secretKey"].toString(),
                 project.properties["signing.password"].toString()
