@@ -16,12 +16,14 @@ plugins {
     `maven-publish`
 
     // Apply the Kotlin JVM plugin to add support for Kotlin.
-    id("org.jetbrains.kotlin.jvm") version "1.3.70"
+    id("org.jetbrains.kotlin.jvm") version "1.4.20"
 }
 
 group = "com.github.minigdx"
-version = project.properties["version"] ?: "1.0-SNAPSHOT"
-
+version = project.properties["version"] ?: "DEV-SNAPSHOT"
+if(version == "unspecified") {
+    version = "DEV-SNAPSHOT"
+}
 repositories {
     gradlePluginPortal()
     mavenCentral()
@@ -34,9 +36,9 @@ dependencies {
     // Use the Kotlin JDK 8 standard library.
     implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
 
-    implementation("org.jetbrains.kotlin.multiplatform:org.jetbrains.kotlin.multiplatform.gradle.plugin:1.3.70")
-    implementation("org.jlleitschuh.gradle.ktlint:org.jlleitschuh.gradle.ktlint.gradle.plugin:9.2.1")
-    implementation("org.jetbrains.dokka:org.jetbrains.dokka.gradle.plugin:0.10.1")
+    implementation("org.jetbrains.kotlin.multiplatform:org.jetbrains.kotlin.multiplatform.gradle.plugin:1.4.20")
+    implementation("org.jlleitschuh.gradle.ktlint:org.jlleitschuh.gradle.ktlint.gradle.plugin:9.4.1")
+    implementation("org.jetbrains.dokka:org.jetbrains.dokka.gradle.plugin:1.4.20")
 
     implementation(platform("me.champeau.jdoctor:jdoctor-bom:0.1"))
     implementation("me.champeau.jdoctor:jdoctor-core")

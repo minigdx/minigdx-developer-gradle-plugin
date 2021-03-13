@@ -96,7 +96,7 @@ class MiniGdxDeveloperPlugin : Plugin<Project> {
     private fun configureDokka(project: Project) {
         project.apply { it.plugin("org.jetbrains.dokka") }
         project.tasks.register("javadocJar", Jar::class.java) {
-            it.dependsOn(project.tasks.getByName("dokka"))
+            it.dependsOn(project.tasks.getByName("dokkaHtml"))
             it.archiveClassifier.set("javadoc")
             it.from(project.buildDir.resolve("dokka"))
         }
