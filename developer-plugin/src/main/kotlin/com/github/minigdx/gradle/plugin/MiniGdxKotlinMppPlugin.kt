@@ -31,28 +31,31 @@ class MiniGdxKotlinMppPlugin : Plugin<Project> {
         project.apply { it.plugin("org.jetbrains.kotlin.multiplatform") }
         project.extensions.configure<KotlinMultiplatformExtension>("kotlin") { mpp ->
             mpp.js {
+                this.compilations.all {
+                    it.kotlinOptions {
+                        freeCompilerArgs += COMPILATION_FLAGS
+                    }
+                }
                 this.useCommonJs()
                 this.browser {
                     this.webpackTask {
                         this.compilation.kotlinOptions {
                             this.sourceMap = true
                             this.sourceMapEmbedSources = "always"
-                            this.freeCompilerArgs += listOf("-Xopt-in=kotlin.ExperimentalStdlibApi")
-
                         }
                     }
                 }
-                this.nodejs
+                this.nodejs()
             }
 
             mpp.jvm {
                 this.compilations.getByName("main").kotlinOptions.apply {
                     jvmTarget = "1.8"
-                    freeCompilerArgs += listOf("-Xopt-in=kotlin.ExperimentalStdlibApi")
+                    freeCompilerArgs += COMPILATION_FLAGS
                 }
                 this.compilations.getByName("test").kotlinOptions.apply {
                     jvmTarget = "1.8"
-                    freeCompilerArgs += listOf("-Xopt-in=kotlin.ExperimentalStdlibApi")
+                    freeCompilerArgs += COMPILATION_FLAGS
                 }
             }
 
@@ -114,15 +117,29 @@ class MiniGdxKotlinMppPlugin : Plugin<Project> {
                     }
                 }
             }
+            mpp.sourceSets.all {
+                it.languageSettings.apply {
+                    this.useExperimentalAnnotation("kotlin.ExperimentalStdlibApi")
+                    this.useExperimentalAnnotation("kotlinx.serialization.ExperimentalSerializationApi")
+                }
+            }
         }
 
         project.afterEvaluate {
             project.tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile::class.java).all {
                 it.kotlinOptions {
                     jvmTarget = "1.8"
-                    freeCompilerArgs += listOf("-Xopt-in=kotlin.ExperimentalStdlibApi")
+                    freeCompilerArgs += COMPILATION_FLAGS
                 }
             }
         }
+    }
+
+    companion object {
+
+        private val COMPILATION_FLAGS = listOf(
+            "-Xopt-in=kotlin.ExperimentalStdlibApi",
+            "-Xopt-in=kotlinx.serialization.ExperimentalSerializationApi"
+        )
     }
 }

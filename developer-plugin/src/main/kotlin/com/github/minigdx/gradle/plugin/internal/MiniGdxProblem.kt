@@ -104,10 +104,10 @@ class MiniGdxException(
             val problem = MiniGdxProblem(
                 severity,
                 Context(project, severity),
-                Supplier { description },
-                Supplier { because },
-                Supplier { documentedAt },
-                solutions.map { Supplier { it as JSolution } }
+                { description },
+                { because },
+                { documentedAt },
+                solutions.map { Supplier { it } }
             )
 
             val message = SimpleTextRenderer.render(problem)

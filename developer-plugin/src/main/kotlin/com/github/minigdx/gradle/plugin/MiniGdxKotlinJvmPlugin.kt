@@ -45,8 +45,16 @@ class MiniGdxKotlinJvmPlugin : Plugin<Project> {
             it.kotlinOptions {
                 this as KotlinJvmOptions
                 this.jvmTarget = "1.8"
-                this.freeCompilerArgs += listOf("-Xjsr305=strict")
+                this.freeCompilerArgs += COMPILATION_FLAGS
             }
         }
+    }
+
+    companion object {
+        private val COMPILATION_FLAGS = listOf(
+            "-Xjsr305=strict",
+            "-Xopt-in=kotlin.ExperimentalStdlibApi",
+            "-Xopt-in=kotlinx.serialization.ExperimentalSerializationApi"
+        )
     }
 }
