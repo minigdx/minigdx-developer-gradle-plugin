@@ -13,6 +13,7 @@ import org.gradle.api.publish.PublishingExtension
 import org.gradle.api.publish.maven.MavenPublication
 import org.gradle.jvm.tasks.Jar
 import org.gradle.plugins.signing.SigningExtension
+import org.gradle.util.GradleVersion
 import java.io.File
 import java.io.IOException
 
@@ -28,6 +29,7 @@ class MiniGdxDeveloperPlugin : Plugin<Project> {
 
     override fun apply(project: Project) {
         project.extensions.create("minigdxDeveloper", MiniGdxDeveloperExtension::class.java, project)
+        configureGradleVersion(project)
         configureProjectVersionAndGroupId(project)
         configureProjectRepository(project)
         configureDokka(project)
@@ -37,6 +39,18 @@ class MiniGdxDeveloperPlugin : Plugin<Project> {
         configureGithubWorkflow(project)
 
         configureSonatype(project)
+    }
+    
+    private fun configureGradleVersion(project: Project) {
+        if (GradleVersion.current() < GradleVersion.version("6.8.2")) {
+            throw MiniGdxException.create(
+                severity = Severity.EASY,
+                project = project,
+                because = "The gradle version used is too old.",
+                description = "The expected gradle version is 6.8.2.",
+                solutions = listOf(Solution("Update the gradle-wrapper.properties with a newer version"))
+            )
+        }
     }
 
     private fun configureProjectVersionAndGroupId(project: Project) {
@@ -106,6 +120,8 @@ class MiniGdxDeveloperPlugin : Plugin<Project> {
         project.repositories.mavenCentral()
         project.repositories.google()
         project.repositories.mavenLocal()
+        // Will be deprecated soon... Required for dokka
+        project.repositories.jcenter()
     }
 
     private fun configureLinter(project: Project) {
