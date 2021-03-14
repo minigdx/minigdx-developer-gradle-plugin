@@ -9,9 +9,10 @@ of all different projects.
 The plugin configure for you:
 
 - Kotlin multiplatform
-- group of the project
-- version of the project
-- github workflow
+- Group Id of projects
+- Versions of projects
+- Basic github workflow
+- Basic Makefile
 
 
 ### Tasks
