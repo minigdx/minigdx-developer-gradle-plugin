@@ -11,11 +11,15 @@ import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.publish.PublishingExtension
 import org.gradle.api.publish.maven.MavenPublication
+import org.gradle.api.publish.maven.tasks.PublishToMavenRepository
 import org.gradle.jvm.tasks.Jar
 import org.gradle.plugins.signing.SigningExtension
 import org.gradle.util.GradleVersion
 import java.io.File
 import java.io.IOException
+import java.net.URI
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 
 /**
  * Plugin for developers of MiniGDX project.
@@ -40,7 +44,7 @@ class MiniGdxDeveloperPlugin : Plugin<Project> {
 
         configureSonatype(project)
     }
-    
+
     private fun configureGradleVersion(project: Project) {
         if (GradleVersion.current() < GradleVersion.version("6.8.2")) {
             throw MiniGdxException.create(
@@ -58,6 +62,12 @@ class MiniGdxDeveloperPlugin : Plugin<Project> {
 
         if (version == "unspecified") {
             version = DEFAULT_VERSION
+        }
+
+        // if the version is snapshot, then create a version using the date and snapshot
+        // so it's possible to deploy a snapshort version without conflicting with local version.
+        if (version == "snapshot") {
+            version = LocalDate.now().format(DateTimeFormatter.ISO_LOCAL_DATE) + "-SNAPSHOT"
         }
 
         project.version = version
@@ -105,6 +115,15 @@ class MiniGdxDeveloperPlugin : Plugin<Project> {
                 }
             }
         }
+        project.tasks.withType(PublishToMavenRepository::class.java).configureEach { publication ->
+            publication.onlyIf {
+                // publish on sonatype only if the username is configured.
+                (publication.name.startsWith("sonatype") &&
+                    project.properties["sonatype.username"]?.toString()?.isNotBlank() == true) ||
+                    !publication.name.startsWith("sonatype")
+            }
+
+        }
     }
 
     private fun configureDokka(project: Project) {
@@ -119,6 +138,12 @@ class MiniGdxDeveloperPlugin : Plugin<Project> {
     private fun configureProjectRepository(project: Project) {
         project.repositories.mavenCentral()
         project.repositories.google()
+        // Snapshot repository. Select only our snapshot dependencies
+        project.repositories.maven {
+            it.url = URI("https://s01.oss.sonatype.org/content/repositories/snapshots/")
+        }.mavenContent {
+            it.includeGroup("com.github.minigdx")
+        }
         project.repositories.mavenLocal()
         // Will be deprecated soon... Required for dokka
         project.repositories.jcenter()
@@ -138,7 +163,6 @@ class MiniGdxDeveloperPlugin : Plugin<Project> {
             solutions = listOf(Solution("An issue can be reported to the developer", ISSUES))
         )
         target.resolve(File(filename).name).apply {
-            println(this.absolutePath)
             if (!exists()) createNewFile()
             writeBytes(content.readBytes())
         }
@@ -201,7 +225,7 @@ class MiniGdxDeveloperPlugin : Plugin<Project> {
             }
 
             it.maven {
-                it.name = "snapshotSonatypeStaging"
+                it.name = "sonatypeSnapshots"
                 it.setUrl("https://s01.oss.sonatype.org/content/repositories/snapshots/")
                 it.credentials {
                     it.username = project.properties["sonatype.username"].toString()
