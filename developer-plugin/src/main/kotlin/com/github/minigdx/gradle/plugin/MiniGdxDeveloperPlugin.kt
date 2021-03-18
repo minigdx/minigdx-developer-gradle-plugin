@@ -16,10 +16,7 @@ import org.gradle.jvm.tasks.Jar
 import org.gradle.plugins.signing.SigningExtension
 import org.gradle.util.GradleVersion
 import java.io.File
-import java.io.IOException
 import java.net.URI
-import java.time.LocalDate
-import java.time.format.DateTimeFormatter
 
 /**
  * Plugin for developers of MiniGDX project.
@@ -62,12 +59,6 @@ class MiniGdxDeveloperPlugin : Plugin<Project> {
 
         if (version == "unspecified") {
             version = DEFAULT_VERSION
-        }
-
-        // if the version is snapshot, then create a version using the date and snapshot
-        // so it's possible to deploy a snapshort version without conflicting with local version.
-        if (version == "snapshot") {
-            version = LocalDate.now().format(DateTimeFormatter.ISO_LOCAL_DATE) + "-SNAPSHOT"
         }
 
         project.version = version
@@ -142,7 +133,8 @@ class MiniGdxDeveloperPlugin : Plugin<Project> {
         project.repositories.maven {
             it.url = URI("https://s01.oss.sonatype.org/content/repositories/snapshots/")
         }.mavenContent {
-            it.includeGroup("com.github.minigdx")
+            it.includeVersionByRegex("com.github.minigdx", "(.*)", "LATEST-SNAPSHOT")
+            it.includeVersionByRegex("com.github.minigdx.(.*)", "(.*)", "LATEST-SNAPSHOT")
         }
         project.repositories.mavenLocal()
         // Will be deprecated soon... Required for dokka
@@ -177,17 +169,13 @@ class MiniGdxDeveloperPlugin : Plugin<Project> {
             it.group = "minigdx-dev"
             it.description = "Copy default Github workflows inside this project."
             it.doLast {
-                try {
-
-                    val target = it.project.projectDir.resolve(".github/workflows")
-                    if (!target.exists()) {
-                        it.project.mkdir(".github/workflows")
-                    }
-                    copy(project, "github/workflows/build.yml", target)
-                    copy(project, "github/workflows/publish-release.yml", target)
-                } catch (ex: IOException) {
-                    ex.printStackTrace()
+                val target = it.project.projectDir.resolve(".github/workflows")
+                if (!target.exists()) {
+                    it.project.mkdir(".github/workflows")
                 }
+                copy(project, "github/workflows/build.yml", target)
+                copy(project, "github/workflows/publish-release.yml", target)
+                copy(project, "github/workflows/publish-snapshot.yml", target)
             }
         }
     }
