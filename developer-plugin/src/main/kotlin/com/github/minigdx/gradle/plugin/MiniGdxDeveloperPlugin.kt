@@ -64,12 +64,6 @@ class MiniGdxDeveloperPlugin : Plugin<Project> {
             version = DEFAULT_VERSION
         }
 
-        // if the version is snapshot, then create a version using the date and snapshot
-        // so it's possible to deploy a snapshort version without conflicting with local version.
-        if (version == "snapshot") {
-            version = LocalDate.now().format(DateTimeFormatter.ISO_LOCAL_DATE) + "-SNAPSHOT"
-        }
-
         project.version = version
         project.group = "com.github.minigdx"
     }
