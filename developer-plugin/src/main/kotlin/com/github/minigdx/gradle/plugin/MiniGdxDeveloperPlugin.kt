@@ -133,7 +133,7 @@ class MiniGdxDeveloperPlugin : Plugin<Project> {
         project.repositories.maven {
             it.url = URI("https://s01.oss.sonatype.org/content/repositories/snapshots/")
         }.mavenContent {
-            it.includeGroup("com.github.minigdx")
+            it.includeVersionByRegex("com.github.minigdx", "(.*)", "LATEST-SNAPSHOT")
         }
         project.repositories.mavenLocal()
         // Will be deprecated soon... Required for dokka
