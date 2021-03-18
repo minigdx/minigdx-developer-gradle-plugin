@@ -16,10 +16,7 @@ import org.gradle.jvm.tasks.Jar
 import org.gradle.plugins.signing.SigningExtension
 import org.gradle.util.GradleVersion
 import java.io.File
-import java.io.IOException
 import java.net.URI
-import java.time.LocalDate
-import java.time.format.DateTimeFormatter
 
 /**
  * Plugin for developers of MiniGDX project.
@@ -171,17 +168,13 @@ class MiniGdxDeveloperPlugin : Plugin<Project> {
             it.group = "minigdx-dev"
             it.description = "Copy default Github workflows inside this project."
             it.doLast {
-                try {
-
-                    val target = it.project.projectDir.resolve(".github/workflows")
-                    if (!target.exists()) {
-                        it.project.mkdir(".github/workflows")
-                    }
-                    copy(project, "github/workflows/build.yml", target)
-                    copy(project, "github/workflows/publish-release.yml", target)
-                } catch (ex: IOException) {
-                    ex.printStackTrace()
+                val target = it.project.projectDir.resolve(".github/workflows")
+                if (!target.exists()) {
+                    it.project.mkdir(".github/workflows")
                 }
+                copy(project, "github/workflows/build.yml", target)
+                copy(project, "github/workflows/publish-release.yml", target)
+                copy(project, "github/workflows/publish-snapshot.yml", target)
             }
         }
     }
