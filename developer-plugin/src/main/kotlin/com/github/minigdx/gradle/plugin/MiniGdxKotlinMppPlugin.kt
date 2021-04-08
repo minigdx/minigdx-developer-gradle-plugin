@@ -2,6 +2,7 @@ package com.github.minigdx.gradle.plugin
 
 import org.gradle.api.Plugin
 import org.gradle.api.Project
+import org.gradle.api.tasks.compile.JavaCompile
 import org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension
 
 /**
@@ -131,6 +132,11 @@ class MiniGdxKotlinMppPlugin : Plugin<Project> {
                     jvmTarget = "1.8"
                     freeCompilerArgs += COMPILATION_FLAGS
                 }
+            }
+
+            project.tasks.withType(JavaCompile::class.java) {
+                it.sourceCompatibility = "1.8"
+                it.targetCompatibility = "1.8"
             }
         }
     }

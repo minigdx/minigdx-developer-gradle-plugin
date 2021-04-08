@@ -41,7 +41,7 @@ dependencies {
     implementation("org.jetbrains.kotlin.multiplatform:org.jetbrains.kotlin.multiplatform.gradle.plugin:1.4.20")
     implementation("org.jlleitschuh.gradle.ktlint:org.jlleitschuh.gradle.ktlint.gradle.plugin:9.4.1")
     implementation("org.jetbrains.dokka:org.jetbrains.dokka.gradle.plugin:1.4.30")
-        ?.because("The 1.4.20 required Java 11 because of an issue with a dependencie which faultly require Java 11.")
+        ?.because("The 1.4.20 required Java 11 because of an issue with a dependency which faultly require Java 11.")
 
     implementation(platform("me.champeau.jdoctor:jdoctor-bom:0.1"))
     implementation("me.champeau.jdoctor:jdoctor-core")
@@ -124,6 +124,12 @@ val functionalTest by tasks.registering(Test::class) {
 tasks.check {
     // Run the functional tests as part of `check`
     dependsOn(functionalTest)
+}
+
+// Ensure "org.gradle.jvm.version" is set to "8" in Gradle metadata.
+tasks.withType<JavaCompile> {
+    sourceCompatibility = JavaVersion.VERSION_1_8.toString()
+    targetCompatibility = JavaVersion.VERSION_1_8.toString()
 }
 
 java {
