@@ -4,6 +4,7 @@ import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.publish.PublishingExtension
 import org.gradle.api.publish.maven.MavenPublication
+import org.gradle.api.tasks.compile.JavaCompile
 import org.jetbrains.kotlin.gradle.dsl.KotlinCompile
 import org.jetbrains.kotlin.gradle.dsl.KotlinJvmOptions
 
@@ -14,8 +15,19 @@ class MiniGdxKotlinJvmPlugin : Plugin<Project> {
 
     override fun apply(project: Project) {
         project.apply { it.plugin("com.github.minigdx.gradle.plugin.developer") }
+        configureJava(project)
         configureKotlin(project)
         configurePublication(project)
+    }
+
+    private fun configureJava(project: Project) {
+        // Ensure "org.gradle.jvm.version" is set to "8" in Gradle metadata.
+        project.afterEvaluate {
+            project.tasks.withType(JavaCompile::class.java) {
+                it.sourceCompatibility = "1.8"
+                it.targetCompatibility = "1.8"
+            }
+        }
     }
 
     private fun configurePublication(project: Project) {
@@ -51,6 +63,7 @@ class MiniGdxKotlinJvmPlugin : Plugin<Project> {
     }
 
     companion object {
+
         private val COMPILATION_FLAGS = listOf(
             "-Xjsr305=strict",
             "-Xopt-in=kotlin.ExperimentalStdlibApi",
