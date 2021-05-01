@@ -60,6 +60,8 @@ class MiniGdxKotlinMppPlugin : Plugin<Project> {
                 }
             }
 
+            mpp.ios()
+
             project.plugins.withId("com.android.library") {
                 mpp.android {
                     publishLibraryVariants("release", "debug")
@@ -102,6 +104,15 @@ class MiniGdxKotlinMppPlugin : Plugin<Project> {
                     it.dependencies {
                         implementation(kotlin("test-junit"))
                     }
+                }
+
+                getByName("iosMain") {
+
+                }
+
+                getByName("iosTest") {
+
+
                 }
 
                 project.plugins.withId("com.android.library") {
