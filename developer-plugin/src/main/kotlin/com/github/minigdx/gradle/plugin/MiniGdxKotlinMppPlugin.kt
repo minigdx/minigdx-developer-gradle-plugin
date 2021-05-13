@@ -60,7 +60,9 @@ class MiniGdxKotlinMppPlugin : Plugin<Project> {
                 }
             }
 
-            mpp.ios()
+            if (project.findProperty(MiniGdxDeveloperExtension.IOS_MPP_PROPERTY) == "true") {
+                mpp.ios()
+            }
 
             project.plugins.withId("com.android.library") {
                 mpp.android {
@@ -106,13 +108,15 @@ class MiniGdxKotlinMppPlugin : Plugin<Project> {
                     }
                 }
 
-                getByName("iosMain") {
+                if (project.findProperty(MiniGdxDeveloperExtension.IOS_MPP_PROPERTY) == "true") {
+                    getByName("iosMain") {
 
-                }
+                    }
 
-                getByName("iosTest") {
+                    getByName("iosTest") {
 
 
+                    }
                 }
 
                 project.plugins.withId("com.android.library") {
