@@ -57,6 +57,11 @@ open class MiniGdxDeveloperExtension(private val project: Project) {
         configure(developer)
         developers.add(developer)
     }
+
+    companion object {
+
+        val IOS_MPP_PROPERTY = "minigdx.mpp.ios"
+    }
 }
 
 private inline fun <reified T> Project.property(): Property<T> {

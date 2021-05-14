@@ -60,6 +60,10 @@ class MiniGdxKotlinMppPlugin : Plugin<Project> {
                 }
             }
 
+            if (project.findProperty(MiniGdxDeveloperExtension.IOS_MPP_PROPERTY) == "true") {
+                mpp.ios()
+            }
+
             project.plugins.withId("com.android.library") {
                 mpp.android {
                     publishLibraryVariants("release", "debug")
@@ -101,6 +105,17 @@ class MiniGdxKotlinMppPlugin : Plugin<Project> {
                 getByName("jvmTest") {
                     it.dependencies {
                         implementation(kotlin("test-junit"))
+                    }
+                }
+
+                if (project.findProperty(MiniGdxDeveloperExtension.IOS_MPP_PROPERTY) == "true") {
+                    getByName("iosMain") {
+
+                    }
+
+                    getByName("iosTest") {
+
+
                     }
                 }
 
