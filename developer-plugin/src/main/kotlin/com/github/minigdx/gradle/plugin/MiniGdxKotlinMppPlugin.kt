@@ -4,6 +4,7 @@ import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.tasks.compile.JavaCompile
 import org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension
+import org.jetbrains.kotlin.gradle.plugin.KotlinJsCompilerType
 
 /**
  * Configure project with Kotlin multiplatform
@@ -31,13 +32,13 @@ class MiniGdxKotlinMppPlugin : Plugin<Project> {
     private fun configureKotlinMultiplatform(project: Project) {
         project.apply { it.plugin("org.jetbrains.kotlin.multiplatform") }
         project.extensions.configure<KotlinMultiplatformExtension>("kotlin") { mpp ->
-            mpp.js {
+            mpp.js(KotlinJsCompilerType.IR) {
+                this.binaries.executable()
                 this.compilations.all {
                     it.kotlinOptions {
                         freeCompilerArgs += COMPILATION_FLAGS
                     }
                 }
-                this.useCommonJs()
                 this.browser {
                     this.webpackTask {
                         this.compilation.kotlinOptions {
@@ -46,7 +47,6 @@ class MiniGdxKotlinMppPlugin : Plugin<Project> {
                         }
                     }
                 }
-                this.nodejs()
             }
 
             mpp.jvm {
