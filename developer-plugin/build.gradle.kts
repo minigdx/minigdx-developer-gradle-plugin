@@ -10,7 +10,7 @@ import org.gradle.jvm.toolchain.JvmVendorSpec.ADOPTOPENJDK
 
 plugins {
     // Plugin publication plugin.
-    id("com.gradle.plugin-publish") version "0.13.0"
+    id("com.gradle.plugin-publish") version "1.0.0"
 
     // Apply the Java Gradle plugin development plugin to add support for developing Gradle plugins
     `java-gradle-plugin`
@@ -59,16 +59,28 @@ gradlePlugin {
     val developer by plugins.creating {
         id = "com.github.minigdx.gradle.plugin.developer"
         implementationClass = "com.github.minigdx.gradle.plugin.MiniGdxDeveloperPlugin"
+        displayName = "MiniGDX Developer plugin"
+        description = """Configure MiniGDX libs with a common set of configuration and tasks.
+                | The usage is mainly for MiniGDX contributors.
+            """.trimMargin()
     }
 
     val mpp by plugins.creating {
         id = "com.github.minigdx.gradle.plugin.developer.mpp"
         implementationClass = "com.github.minigdx.gradle.plugin.MiniGdxKotlinMppPlugin"
+        displayName = "MiniGDX Kotlin JVM Developer plugin"
+        description = """Configure MiniGDX libs to build for the JVM only.
+                | The usage is mainly for MiniGDX contributors.
+            """.trimMargin()
     }
 
     val jvm by plugins.creating {
         id = "com.github.minigdx.gradle.plugin.developer.jvm"
         implementationClass = "com.github.minigdx.gradle.plugin.MiniGdxKotlinJvmPlugin"
+        displayName = "MiniGDX Kotlin Multiplatform Developer plugin"
+        description = """Configure MiniGDX libs to build for different platforms.
+                | The usage is mainly for MiniGDX contributors.
+            """.trimMargin()
     }
 }
 
@@ -76,33 +88,12 @@ pluginBundle {
     website = "https://github.com/minigdx/minigdx-developer-gradle-plugin"
     vcsUrl = "https://github.com/minigdx/minigdx-developer-gradle-plugin"
 
-    (plugins) {
-        // first plugin
-        "developer" {
-            // id is captured from java-gradle-plugin configuration
-            displayName = "MiniGDX Developer plugin"
-            description = """Configure MiniGDX libs with a common set of configuration and tasks.
-                | The usage is mainly for MiniGDX contributors.
-            """.trimMargin()
-            tags = listOf("minigdx", "developer")
-        }
+    tags = listOf("minigdx", "developer")
 
-        "jvm" {
-            displayName = "MiniGDX Kotlin JVM Developer plugin"
-            description = """Configure MiniGDX libs to build for the JVM only.
-                | The usage is mainly for MiniGDX contributors.
-            """.trimMargin()
-            tags = listOf("minigdx", "developer", "kotlin", "jvm")
-        }
-
-        "mpp" {
-            displayName = "MiniGDX Kotlin Multiplatform Developer plugin"
-            description = """Configure MiniGDX libs to build for different platforms.
-                | The usage is mainly for MiniGDX contributors.
-            """.trimMargin()
-            tags = listOf("minigdx", "developer", "kotlin", "jvm", "mpp", "ios", "js", "android", "native")
-        }
-    }
+    pluginTags = mapOf(
+        "jvm" to listOf("kotlin", "jvm"),
+        "mpp" to listOf("kotlin", "jvm", "mpp", "ios", "js", "android", "native")
+    )
 }
 
 val compileKotlin: org.jetbrains.kotlin.gradle.tasks.KotlinCompile by tasks
