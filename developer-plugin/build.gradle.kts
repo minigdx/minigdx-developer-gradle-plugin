@@ -43,9 +43,9 @@ dependencies {
     implementation("org.jetbrains.dokka:org.jetbrains.dokka.gradle.plugin:1.4.30")
         ?.because("The 1.4.20 required Java 11 because of an issue with a dependency which faultly require Java 11.")
 
-    implementation(platform("me.champeau.jdoctor:jdoctor-bom:0.1"))
+    implementation(platform("me.champeau.jdoctor:jdoctor-bom:0.1.2"))
     implementation("me.champeau.jdoctor:jdoctor-core")
-    implementation("me.champeau.jdoctor:jdoctor-utils:0.1")
+    implementation("me.champeau.jdoctor:jdoctor-utils:0.1.2")
 
     // Use the Kotlin test library.
     testImplementation("org.jetbrains.kotlin:kotlin-test")
