@@ -39,9 +39,8 @@ dependencies {
     implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
 
     implementation("org.jetbrains.kotlin.multiplatform:org.jetbrains.kotlin.multiplatform.gradle.plugin:1.6.21")
-    implementation("org.jlleitschuh.gradle.ktlint:org.jlleitschuh.gradle.ktlint.gradle.plugin:9.4.1")
-    implementation("org.jetbrains.dokka:org.jetbrains.dokka.gradle.plugin:1.4.30")
-        ?.because("The 1.4.20 required Java 11 because of an issue with a dependency which faultly require Java 11.")
+    implementation("org.jlleitschuh.gradle.ktlint:org.jlleitschuh.gradle.ktlint.gradle.plugin:11.0.0")
+    implementation("org.jetbrains.dokka:org.jetbrains.dokka.gradle.plugin:1.6.21")
 
     implementation(platform("me.champeau.jdoctor:jdoctor-bom:0.1.2"))
     implementation("me.champeau.jdoctor:jdoctor-core")

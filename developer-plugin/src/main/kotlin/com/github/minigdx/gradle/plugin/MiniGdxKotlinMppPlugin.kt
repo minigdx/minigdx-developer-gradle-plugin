@@ -36,7 +36,7 @@ class MiniGdxKotlinMppPlugin : Plugin<Project> {
                 this.binaries.executable()
                 this.compilations.all {
                     it.kotlinOptions {
-                        freeCompilerArgs += COMPILATION_FLAGS
+                        freeCompilerArgs = freeCompilerArgs + COMPILATION_FLAGS
                     }
                 }
                 this.browser {
@@ -52,11 +52,11 @@ class MiniGdxKotlinMppPlugin : Plugin<Project> {
             mpp.jvm {
                 this.compilations.getByName("main").kotlinOptions.apply {
                     jvmTarget = "1.8"
-                    freeCompilerArgs += COMPILATION_FLAGS
+                    freeCompilerArgs = freeCompilerArgs + COMPILATION_FLAGS
                 }
                 this.compilations.getByName("test").kotlinOptions.apply {
                     jvmTarget = "1.8"
-                    freeCompilerArgs += COMPILATION_FLAGS
+                    freeCompilerArgs = freeCompilerArgs + COMPILATION_FLAGS
                 }
             }
 
@@ -135,8 +135,8 @@ class MiniGdxKotlinMppPlugin : Plugin<Project> {
             }
             mpp.sourceSets.all {
                 it.languageSettings.apply {
-                    this.useExperimentalAnnotation("kotlin.ExperimentalStdlibApi")
-                    this.useExperimentalAnnotation("kotlinx.serialization.ExperimentalSerializationApi")
+                    this.optIn("kotlin.ExperimentalStdlibApi")
+                    this.optIn("kotlinx.serialization.ExperimentalSerializationApi")
                 }
             }
         }
@@ -145,7 +145,7 @@ class MiniGdxKotlinMppPlugin : Plugin<Project> {
             project.tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile::class.java).all {
                 it.kotlinOptions {
                     jvmTarget = "1.8"
-                    freeCompilerArgs += COMPILATION_FLAGS
+                    freeCompilerArgs = freeCompilerArgs + COMPILATION_FLAGS
                 }
             }
 
