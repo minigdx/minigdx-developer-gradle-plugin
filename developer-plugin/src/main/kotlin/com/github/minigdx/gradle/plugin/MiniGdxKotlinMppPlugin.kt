@@ -172,8 +172,8 @@ class MiniGdxKotlinMppPlugin : Plugin<Project> {
     companion object {
 
         private val COMPILATION_FLAGS = listOf(
-            "-Xopt-in=kotlin.ExperimentalStdlibApi",
-            "-Xopt-in=kotlinx.serialization.ExperimentalSerializationApi"
+            "-opt-in=kotlin.ExperimentalStdlibApi",
+            "-opt-in=kotlinx.serialization.ExperimentalSerializationApi"
         )
     }
 }

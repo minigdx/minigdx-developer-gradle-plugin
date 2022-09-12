@@ -82,8 +82,8 @@ class MiniGdxKotlinJvmPlugin : Plugin<Project> {
 
         private val COMPILATION_FLAGS = listOf(
             "-Xjsr305=strict",
-            "-Xopt-in=kotlin.ExperimentalStdlibApi",
-            "-Xopt-in=kotlinx.serialization.ExperimentalSerializationApi"
+            "-opt-in=kotlin.ExperimentalStdlibApi",
+            "-opt-in=kotlinx.serialization.ExperimentalSerializationApi"
         )
     }
 }
