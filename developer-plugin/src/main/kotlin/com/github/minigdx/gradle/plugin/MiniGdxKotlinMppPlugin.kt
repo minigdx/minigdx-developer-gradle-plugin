@@ -1,10 +1,14 @@
 package com.github.minigdx.gradle.plugin
 
+import com.github.minigdx.gradle.plugin.internal.Constants.JAVA_VERSION
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.tasks.compile.JavaCompile
+import org.gradle.jvm.toolchain.JavaLanguageVersion
+import org.gradle.jvm.toolchain.JavaToolchainService
 import org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension
 import org.jetbrains.kotlin.gradle.plugin.KotlinJsCompilerType
+import org.jetbrains.kotlin.gradle.tasks.UsesKotlinJavaToolchain
 
 /**
  * Configure project with Kotlin multiplatform
@@ -115,7 +119,6 @@ class MiniGdxKotlinMppPlugin : Plugin<Project> {
 
                     getByName("iosTest") {
 
-
                     }
                 }
 
@@ -142,7 +145,14 @@ class MiniGdxKotlinMppPlugin : Plugin<Project> {
         }
 
         project.afterEvaluate {
+            val toolchainService = project.extensions.getByType(JavaToolchainService::class.java)
             project.tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile::class.java).all {
+                it as UsesKotlinJavaToolchain
+                it.kotlinJavaToolchain.toolchain.use(
+                    toolchainService.launcherFor {
+                        it.languageVersion.set(JavaLanguageVersion.of(JAVA_VERSION))
+                    }
+                )
                 it.kotlinOptions {
                     jvmTarget = "1.8"
                     freeCompilerArgs = freeCompilerArgs + COMPILATION_FLAGS
@@ -152,6 +162,9 @@ class MiniGdxKotlinMppPlugin : Plugin<Project> {
             project.tasks.withType(JavaCompile::class.java) {
                 it.sourceCompatibility = "1.8"
                 it.targetCompatibility = "1.8"
+                val javaCompiler = toolchainService.compilerFor {
+                    it.languageVersion.set(JavaLanguageVersion.of(JAVA_VERSION)) }
+                it.javaCompiler.set(javaCompiler)
             }
         }
     }

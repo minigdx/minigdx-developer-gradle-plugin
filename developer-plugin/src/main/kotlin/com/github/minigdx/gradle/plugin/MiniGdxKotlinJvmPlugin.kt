@@ -1,12 +1,16 @@
 package com.github.minigdx.gradle.plugin
 
+import com.github.minigdx.gradle.plugin.internal.Constants.JAVA_VERSION
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.publish.PublishingExtension
 import org.gradle.api.publish.maven.MavenPublication
 import org.gradle.api.tasks.compile.JavaCompile
+import org.gradle.jvm.toolchain.JavaLanguageVersion
+import org.gradle.jvm.toolchain.JavaToolchainService
 import org.jetbrains.kotlin.gradle.dsl.KotlinCompile
 import org.jetbrains.kotlin.gradle.dsl.KotlinJvmOptions
+import org.jetbrains.kotlin.gradle.tasks.UsesKotlinJavaToolchain
 
 /**
  * Configure projects using only Kotlin for the JVM
@@ -23,9 +27,13 @@ class MiniGdxKotlinJvmPlugin : Plugin<Project> {
     private fun configureJava(project: Project) {
         // Ensure "org.gradle.jvm.version" is set to "8" in Gradle metadata.
         project.afterEvaluate {
+            val toolchainService = project.extensions.getByType(JavaToolchainService::class.java)
             project.tasks.withType(JavaCompile::class.java) {
                 it.sourceCompatibility = "1.8"
                 it.targetCompatibility = "1.8"
+                val javaCompiler = toolchainService.compilerFor {
+                    it.languageVersion.set(JavaLanguageVersion.of(JAVA_VERSION)) }
+                it.javaCompiler.set(javaCompiler)
             }
         }
     }
@@ -54,6 +62,14 @@ class MiniGdxKotlinJvmPlugin : Plugin<Project> {
         }
 
         project.tasks.withType(KotlinCompile::class.java).forEach {
+            it as UsesKotlinJavaToolchain
+            val toolchainService = project.extensions.getByType(JavaToolchainService::class.java)
+            it.kotlinJavaToolchain.toolchain.use(
+                toolchainService.launcherFor {
+                    it.languageVersion.set(JavaLanguageVersion.of(JAVA_VERSION))
+                }
+            )
+
             it.kotlinOptions {
                 this as KotlinJvmOptions
                 this.jvmTarget = "1.8"
