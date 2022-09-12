@@ -1,9 +1,14 @@
 package com.github.minigdx.gradle.plugin
 
+import com.github.minigdx.gradle.plugin.internal.Constants.JAVA_VERSION
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.tasks.compile.JavaCompile
+import org.gradle.jvm.toolchain.JavaLanguageVersion
+import org.gradle.jvm.toolchain.JavaToolchainService
 import org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension
+import org.jetbrains.kotlin.gradle.plugin.KotlinJsCompilerType
+import org.jetbrains.kotlin.gradle.tasks.UsesKotlinJavaToolchain
 
 /**
  * Configure project with Kotlin multiplatform
@@ -31,13 +36,13 @@ class MiniGdxKotlinMppPlugin : Plugin<Project> {
     private fun configureKotlinMultiplatform(project: Project) {
         project.apply { it.plugin("org.jetbrains.kotlin.multiplatform") }
         project.extensions.configure<KotlinMultiplatformExtension>("kotlin") { mpp ->
-            mpp.js {
+            mpp.js(KotlinJsCompilerType.IR) {
+                this.binaries.executable()
                 this.compilations.all {
                     it.kotlinOptions {
-                        freeCompilerArgs += COMPILATION_FLAGS
+                        freeCompilerArgs = freeCompilerArgs + COMPILATION_FLAGS
                     }
                 }
-                this.useCommonJs()
                 this.browser {
                     this.webpackTask {
                         this.compilation.kotlinOptions {
@@ -46,18 +51,21 @@ class MiniGdxKotlinMppPlugin : Plugin<Project> {
                         }
                     }
                 }
-                this.nodejs()
             }
 
             mpp.jvm {
                 this.compilations.getByName("main").kotlinOptions.apply {
                     jvmTarget = "1.8"
-                    freeCompilerArgs += COMPILATION_FLAGS
+                    freeCompilerArgs = freeCompilerArgs + COMPILATION_FLAGS
                 }
                 this.compilations.getByName("test").kotlinOptions.apply {
                     jvmTarget = "1.8"
-                    freeCompilerArgs += COMPILATION_FLAGS
+                    freeCompilerArgs = freeCompilerArgs + COMPILATION_FLAGS
                 }
+            }
+
+            if (project.findProperty(MiniGdxDeveloperExtension.IOS_MPP_PROPERTY) == "true") {
+                mpp.ios()
             }
 
             project.plugins.withId("com.android.library") {
@@ -104,6 +112,16 @@ class MiniGdxKotlinMppPlugin : Plugin<Project> {
                     }
                 }
 
+                if (project.findProperty(MiniGdxDeveloperExtension.IOS_MPP_PROPERTY) == "true") {
+                    getByName("iosMain") {
+
+                    }
+
+                    getByName("iosTest") {
+
+                    }
+                }
+
                 project.plugins.withId("com.android.library") {
                     getByName("androidMain") {
                         it.dependencies {
@@ -120,23 +138,33 @@ class MiniGdxKotlinMppPlugin : Plugin<Project> {
             }
             mpp.sourceSets.all {
                 it.languageSettings.apply {
-                    this.useExperimentalAnnotation("kotlin.ExperimentalStdlibApi")
-                    this.useExperimentalAnnotation("kotlinx.serialization.ExperimentalSerializationApi")
+                    this.optIn("kotlin.ExperimentalStdlibApi")
+                    this.optIn("kotlinx.serialization.ExperimentalSerializationApi")
                 }
             }
         }
 
         project.afterEvaluate {
+            val toolchainService = project.extensions.getByType(JavaToolchainService::class.java)
             project.tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile::class.java).all {
+                it as UsesKotlinJavaToolchain
+                it.kotlinJavaToolchain.toolchain.use(
+                    toolchainService.launcherFor {
+                        it.languageVersion.set(JavaLanguageVersion.of(JAVA_VERSION))
+                    }
+                )
                 it.kotlinOptions {
                     jvmTarget = "1.8"
-                    freeCompilerArgs += COMPILATION_FLAGS
+                    freeCompilerArgs = freeCompilerArgs + COMPILATION_FLAGS
                 }
             }
 
             project.tasks.withType(JavaCompile::class.java) {
                 it.sourceCompatibility = "1.8"
                 it.targetCompatibility = "1.8"
+                val javaCompiler = toolchainService.compilerFor {
+                    it.languageVersion.set(JavaLanguageVersion.of(JAVA_VERSION)) }
+                it.javaCompiler.set(javaCompiler)
             }
         }
     }
@@ -144,8 +172,8 @@ class MiniGdxKotlinMppPlugin : Plugin<Project> {
     companion object {
 
         private val COMPILATION_FLAGS = listOf(
-            "-Xopt-in=kotlin.ExperimentalStdlibApi",
-            "-Xopt-in=kotlinx.serialization.ExperimentalSerializationApi"
+            "-opt-in=kotlin.ExperimentalStdlibApi",
+            "-opt-in=kotlinx.serialization.ExperimentalSerializationApi"
         )
     }
 }

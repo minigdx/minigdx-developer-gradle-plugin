@@ -137,8 +137,6 @@ class MiniGdxDeveloperPlugin : Plugin<Project> {
             it.includeVersionByRegex("com.github.minigdx.(.*)", "(.*)", "LATEST-SNAPSHOT")
         }
         project.repositories.mavenLocal()
-        // Will be deprecated soon... Required for dokka
-        project.repositories.jcenter()
     }
 
     private fun configureLinter(project: Project) {
