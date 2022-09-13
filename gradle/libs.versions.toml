@@ -1,0 +1,27 @@
+[versions]
+kotlin = "1.6.21"
+ktlint = "11.0.0"
+jdoctor = "0.1.2"
+gradlePublish = "1.0.0"
+
+[libraries]
+kotlin-bom = { module = "org.jetbrains.kotlin:kotlin-bom" }
+kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test" }
+kotlin-test-junit = { module = "org.jetbrains.kotlin:kotlin-test-junit" }
+kotlin-stdlib = { module = "org.jetbrains.kotlin:kotlin-stdlib-jdk8" }
+kotlin-plugin-mpp = { module = "org.jetbrains.kotlin.multiplatform:org.jetbrains.kotlin.multiplatform.gradle.plugin", version.ref = "kotlin" }
+kotlin-plugin-dokka = { module = "org.jetbrains.dokka:org.jetbrains.dokka.gradle.plugin", version.ref = "kotlin" }
+
+ktlint-plugin = { module = "org.jlleitschuh.gradle.ktlint:org.jlleitschuh.gradle.ktlint.gradle.plugin", version.ref = "ktlint" }
+
+jdoctor-bom = {module = "me.champeau.jdoctor:jdoctor-bom", version.ref = "jdoctor" }
+jdoctor-core = {module = "me.champeau.jdoctor:jdoctor-core" }
+jdoctor-utils = {module = "me.champeau.jdoctor:jdoctor-utils", version.ref = "jdoctor" }
+
+
+[bundles]
+test = ["kotlin-test", "kotlin-test-junit"]
+
+[plugins]
+gradle-publish = { id = "com.gradle.plugin-publish", version.ref = "gradlePublish" }
+kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
