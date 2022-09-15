@@ -15,11 +15,10 @@ class MiniGdxProblem(
     reason: Supplier<String>,
     docUrl: Supplier<String?>,
     solutions: List<Supplier<JSolution>>
-) : BaseProblem<MiniGdxProblem.ProblemId, Severity, Context, MiniGdxProblem.Payload>(
+) : BaseProblem<MiniGdxProblem.ProblemId, Severity, Context>(
     ProblemId.PROBLEM,
     severity,
     context,
-    Payload(),
     shortDescription,
     Supplier { -> null },
     reason,
