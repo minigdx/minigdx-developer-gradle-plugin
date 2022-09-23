@@ -72,7 +72,9 @@ class MiniGdxDeveloperPlugin : Plugin<Project> {
             project.extensions.configure(PublishingExtension::class.java) {
                 // Configure publication (what to publish)
                 it.publications.withType(MavenPublication::class.java).configureEach {
-                    it.artifact(project.tasks.getByName("javadocJar"))
+                    if(it.name != "pluginMaven") {
+                        it.artifact(project.tasks.getByName("javadocJar"))
+                    }
 
                     it.pom {
                         it.name.set(ext.name)
