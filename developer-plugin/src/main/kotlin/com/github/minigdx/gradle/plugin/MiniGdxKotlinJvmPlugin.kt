@@ -6,6 +6,7 @@ import org.gradle.api.Project
 import org.gradle.api.publish.PublishingExtension
 import org.gradle.api.publish.maven.MavenPublication
 import org.gradle.api.tasks.compile.JavaCompile
+import org.gradle.jvm.tasks.Jar
 import org.gradle.jvm.toolchain.JavaLanguageVersion
 import org.gradle.jvm.toolchain.JavaToolchainService
 import org.jetbrains.kotlin.gradle.dsl.KotlinCompile
@@ -34,6 +35,20 @@ class MiniGdxKotlinJvmPlugin : Plugin<Project> {
                 val javaCompiler = toolchainService.compilerFor {
                     it.languageVersion.set(JavaLanguageVersion.of(JAVA_VERSION)) }
                 it.javaCompiler.set(javaCompiler)
+            }
+        }
+
+        project.tasks.withType(Jar::class.java).whenTaskAdded {
+            val projectName = project.name
+            val projectVersion = project.version.toString()
+
+            project.tasks.withType(Jar::class.java) {
+                it.manifest {
+                    it.attributes(mapOf(
+                        "Implementation-Title" to projectName,
+                        "Implementation-Version" to projectVersion
+                    ))
+                }
             }
         }
     }

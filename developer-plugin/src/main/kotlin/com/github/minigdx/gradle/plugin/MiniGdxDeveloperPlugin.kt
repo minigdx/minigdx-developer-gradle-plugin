@@ -15,6 +15,7 @@ import org.gradle.api.publish.maven.tasks.PublishToMavenRepository
 import org.gradle.jvm.tasks.Jar
 import org.gradle.plugins.signing.SigningExtension
 import org.gradle.util.GradleVersion
+import org.jetbrains.dokka.gradle.DokkaTask
 import java.io.File
 import java.net.URI
 
@@ -72,7 +73,8 @@ class MiniGdxDeveloperPlugin : Plugin<Project> {
             project.extensions.configure(PublishingExtension::class.java) {
                 // Configure publication (what to publish)
                 it.publications.withType(MavenPublication::class.java).configureEach {
-                    if(it.name != "pluginMaven") {
+                    if (it.name != "pluginMaven") {
+                        // TODO: [CACHE] Create variable. Push it outside lambda
                         it.artifact(project.tasks.getByName("javadocJar"))
                     }
 
@@ -112,6 +114,7 @@ class MiniGdxDeveloperPlugin : Plugin<Project> {
             publication.onlyIf {
                 // publish on sonatype only if the username is configured.
                 (publication.name.startsWith("sonatype") &&
+                    // TODO: [CACHE] Might need to do something about that.
                     project.properties["sonatype.username"]?.toString()?.isNotBlank() == true) ||
                     !publication.name.startsWith("sonatype")
             }
@@ -120,11 +123,20 @@ class MiniGdxDeveloperPlugin : Plugin<Project> {
     }
 
     private fun configureDokka(project: Project) {
+        // TODO - [CACHE] Dokka doesn't support Configuration Cache yet
+        //      See: https://github.com/Kotlin/dokka/issues/2231
         project.apply { it.plugin("org.jetbrains.dokka") }
         project.tasks.register("javadocJar", Jar::class.java) {
             it.dependsOn(project.tasks.getByName("dokkaHtml"))
             it.archiveClassifier.set("javadoc")
             it.from(project.buildDir.resolve("dokka"))
+        }
+
+        project.tasks.withType(DokkaTask::class.java).whenTaskAdded { dokka ->
+            dokka.notCompatibleWithConfigurationCache(
+                "The dokka tasks are not compatible yet " +
+                    "with the configuration cache."
+            )
         }
     }
 
@@ -145,6 +157,7 @@ class MiniGdxDeveloperPlugin : Plugin<Project> {
         project.apply { it.plugin("org.jlleitschuh.gradle.ktlint") }
     }
 
+    // TODO: [CACHE] Don't pass project any more to the method
     private fun copy(project: Project, filename: String, target: File) {
         val content = classLoader.getResourceAsStream(filename) ?: throw MiniGdxException.create(
             severity = Severity.GRAVE,
@@ -169,6 +182,7 @@ class MiniGdxDeveloperPlugin : Plugin<Project> {
             it.group = "minigdx-dev"
             it.description = "Copy default Github workflows inside this project."
             it.doLast {
+                // TODO: [CACHE] Move target outside lambda
                 val target = it.project.projectDir.resolve(".github/workflows")
                 if (!target.exists()) {
                     it.project.mkdir(".github/workflows")
@@ -189,6 +203,7 @@ class MiniGdxDeveloperPlugin : Plugin<Project> {
             it.group = "minigdx-dev"
             it.description = "Copy default Makefile inside this project."
             it.doLast {
+                // TODO: [CACHE] move target out of lambda
                 val target = it.project.projectDir
                 copy(project, "Makefile", target)
             }
