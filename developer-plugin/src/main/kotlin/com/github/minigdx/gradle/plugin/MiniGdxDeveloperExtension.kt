@@ -1,7 +1,10 @@
 package com.github.minigdx.gradle.plugin
 
+import org.gradle.api.Action
+import org.gradle.api.NamedDomainObjectList
 import org.gradle.api.Project
 import org.gradle.api.provider.Property
+import javax.inject.Inject
 
 open class MiniGdxDeveloperExtension(private val project: Project) {
 
@@ -20,13 +23,13 @@ open class MiniGdxDeveloperExtension(private val project: Project) {
      */
     val projectUrl: Property<String> = project.property()
 
-    val licence = Licence(project)
+    val licence: Licence = project.objects.newInstance(Licence::class.java, project)
 
-    fun licence(configuration: Licence.() -> Unit) {
-        configuration(licence)
+    fun licence(configuration: Action<Licence>) {
+        configuration.execute(licence)
     }
 
-    class Licence(project: Project) {
+    open class Licence @Inject constructor(project: Project) {
         /**
          * Name of the Licence.
          */
@@ -38,7 +41,8 @@ open class MiniGdxDeveloperExtension(private val project: Project) {
         val url: Property<String> = project.property()
     }
 
-    class Developer(project: Project) {
+
+    open class Developer @Inject constructor( project: Project) {
 
         val name: Property<String> = project.property()
 
@@ -47,14 +51,14 @@ open class MiniGdxDeveloperExtension(private val project: Project) {
         val url: Property<String> = project.property()
     }
 
-    val developers = mutableListOf<Developer>()
+    val developers: NamedDomainObjectList<Developer> = project.objects.namedDomainObjectList(Developer::class.java)
 
     /**
      * Add a developer to this project.
      */
-    fun developer(configure: Developer.() -> Unit) {
+    fun developer(configure: Action<Developer>) {
         val developer = Developer(project)
-        configure(developer)
+        configure.execute(developer)
         developers.add(developer)
     }
 

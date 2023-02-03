@@ -44,10 +44,14 @@ class MiniGdxDeveloperPlugin : Plugin<Project> {
     }
 
     private fun configureGradleVersion(project: Project) {
+        val projectName = project.name
+        val gradleVersion = project.gradle.gradleVersion
+
         if (GradleVersion.current() < GradleVersion.version("6.8.2")) {
             throw MiniGdxException.create(
                 severity = Severity.EASY,
-                project = project,
+                projectName = projectName,
+                gradleVersion = gradleVersion,
                 because = "The gradle version used is too old.",
                 description = "The expected gradle version is 6.8.2.",
                 solutions = listOf(Solution("Update the gradle-wrapper.properties with a newer version"))
@@ -157,11 +161,11 @@ class MiniGdxDeveloperPlugin : Plugin<Project> {
         project.apply { it.plugin("org.jlleitschuh.gradle.ktlint") }
     }
 
-    // TODO: [CACHE] Don't pass project any more to the method
-    private fun copy(project: Project, filename: String, target: File) {
+    private fun copy(projectName: String, gradleVersion: String, filename: String, target: File) {
         val content = classLoader.getResourceAsStream(filename) ?: throw MiniGdxException.create(
             severity = Severity.GRAVE,
-            project = project,
+            projectName = projectName,
+            gradleVersion = gradleVersion,
             because = "'$filename' file not found in the plugin jar! The plugin might have been incorrectly packaged.",
             description = "The plugin is trying to copy a resource that should has been packaged into the plugin " +
                 "but is not. As this file is required, the plugin will stop.",
@@ -178,18 +182,20 @@ class MiniGdxDeveloperPlugin : Plugin<Project> {
         if (project.rootProject.tasks.findByName("createGithubWorkflows") != null) {
             return
         }
+        val target = project.rootProject.projectDir.resolve(".github/workflows")
+        val projectName = project.name
+        val gradleVersion = project.gradle.gradleVersion
+
         project.rootProject.tasks.register("createGithubWorkflows") {
             it.group = "minigdx-dev"
             it.description = "Copy default Github workflows inside this project."
             it.doLast {
-                // TODO: [CACHE] Move target outside lambda
-                val target = it.project.projectDir.resolve(".github/workflows")
                 if (!target.exists()) {
                     it.project.mkdir(".github/workflows")
                 }
-                copy(project, "github/workflows/build.yml", target)
-                copy(project, "github/workflows/publish-release.yml", target)
-                copy(project, "github/workflows/publish-snapshot.yml", target)
+                copy(projectName, gradleVersion, "github/workflows/build.yml", target)
+                copy(projectName, gradleVersion,  "github/workflows/publish-release.yml", target)
+                copy(projectName, gradleVersion, "github/workflows/publish-snapshot.yml", target)
             }
         }
     }
@@ -199,13 +205,15 @@ class MiniGdxDeveloperPlugin : Plugin<Project> {
         if (project.rootProject.tasks.findByName("createMakefile") != null) {
             return
         }
+        val target = project.rootProject.projectDir
+        val projectName = project.name
+        val gradleVersion = project.gradle.gradleVersion
+
         project.rootProject.tasks.register("createMakefile") {
             it.group = "minigdx-dev"
             it.description = "Copy default Makefile inside this project."
             it.doLast {
-                // TODO: [CACHE] move target out of lambda
-                val target = it.project.projectDir
-                copy(project, "Makefile", target)
+                copy(projectName, gradleVersion, "Makefile", target)
             }
         }
     }
