@@ -1,8 +1,9 @@
 [versions]
-kotlin = "1.6.21"
-ktlint = "11.0.0"
+kotlin = "1.8.10"
+kotlin-dokka = "1.7.20"
+ktlint = "11.1.0"
 jdoctor = "0.1.2"
-gradlePublish = "1.0.0"
+gradlePublish = "1.1.0"
 
 [libraries]
 kotlin-bom = { module = "org.jetbrains.kotlin:kotlin-bom" }
@@ -10,7 +11,7 @@ kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test" }
 kotlin-test-junit = { module = "org.jetbrains.kotlin:kotlin-test-junit" }
 kotlin-stdlib = { module = "org.jetbrains.kotlin:kotlin-stdlib-jdk8" }
 kotlin-plugin-mpp = { module = "org.jetbrains.kotlin.multiplatform:org.jetbrains.kotlin.multiplatform.gradle.plugin", version.ref = "kotlin" }
-kotlin-plugin-dokka = { module = "org.jetbrains.dokka:org.jetbrains.dokka.gradle.plugin", version.ref = "kotlin" }
+kotlin-plugin-dokka = { module = "org.jetbrains.dokka:org.jetbrains.dokka.gradle.plugin", version.ref = "kotlin-dokka" }
 
 ktlint-plugin = { module = "org.jlleitschuh.gradle.ktlint:org.jlleitschuh.gradle.ktlint.gradle.plugin", version.ref = "ktlint" }
 
