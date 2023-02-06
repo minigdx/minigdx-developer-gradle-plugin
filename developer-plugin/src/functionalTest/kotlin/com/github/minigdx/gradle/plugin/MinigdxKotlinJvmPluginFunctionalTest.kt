@@ -24,7 +24,11 @@ class MinigdxKotlinJvmPluginFunctionalTest {
         // Setup the test build
         val projectDir = temporaryFolder.newFolder("build", "functionalTest")
         projectDir.mkdirs()
-        projectDir.resolve("settings.gradle").writeText("")
+        projectDir.resolve("settings.gradle").writeText("""
+plugins {
+    id("org.gradle.toolchains.foojay-resolver-convention") version("0.4.0")
+}
+""")
         projectDir.resolve("build.gradle").writeText(
             """
             plugins {
@@ -49,7 +53,11 @@ class MinigdxKotlinJvmPluginFunctionalTest {
         // Setup the test build
         val projectDir = temporaryFolder.newFolder("build", "functionalTest")
         projectDir.mkdirs()
-        projectDir.resolve("settings.gradle").writeText("")
+        projectDir.resolve("settings.gradle").writeText("""
+plugins {
+    id("org.gradle.toolchains.foojay-resolver-convention") version("0.4.0")
+}
+""")
         projectDir.resolve("build.gradle").writeText(
             """
             plugins {

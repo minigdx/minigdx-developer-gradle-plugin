@@ -136,7 +136,7 @@ class MiniGdxDeveloperPlugin : Plugin<Project> {
             it.from(project.buildDir.resolve("dokka"))
         }
 
-        project.tasks.withType(DokkaTask::class.java).whenTaskAdded { dokka ->
+        project.tasks.withType(DokkaTask::class.java).configureEach { dokka ->
             dokka.notCompatibleWithConfigurationCache(
                 "The dokka tasks are not compatible yet " +
                     "with the configuration cache."

@@ -146,7 +146,7 @@ class MiniGdxKotlinMppPlugin : Plugin<Project> {
 
         project.afterEvaluate {
             val toolchainService = project.extensions.getByType(JavaToolchainService::class.java)
-            project.tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile::class.java).all {
+            project.tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile::class.java).configureEach {
                 it as UsesKotlinJavaToolchain
                 it.kotlinJavaToolchain.toolchain.use(
                     toolchainService.launcherFor {
@@ -159,7 +159,7 @@ class MiniGdxKotlinMppPlugin : Plugin<Project> {
                 }
             }
 
-            project.tasks.withType(JavaCompile::class.java) {
+            project.tasks.withType(JavaCompile::class.java).configureEach {
                 it.sourceCompatibility = "1.8"
                 it.targetCompatibility = "1.8"
                 val javaCompiler = toolchainService.compilerFor {
