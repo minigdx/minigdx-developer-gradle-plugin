@@ -129,7 +129,7 @@ class MiniGdxKotlinMppPlugin : Plugin<Project> {
                         }
                     }
 
-                    getByName("androidTest") {
+                    getByName("androidUnitTest") {
                         it.dependencies {
                             implementation(kotlin("test-junit"))
                         }

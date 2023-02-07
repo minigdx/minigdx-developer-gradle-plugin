@@ -3,7 +3,6 @@
  */
 package com.github.minigdx.gradle.plugin
 
-import java.io.File
 import org.gradle.testkit.runner.GradleRunner
 import org.gradle.testkit.runner.TaskOutcome
 import org.junit.Rule
