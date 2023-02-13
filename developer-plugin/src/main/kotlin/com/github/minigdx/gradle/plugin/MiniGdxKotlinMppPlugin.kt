@@ -66,6 +66,7 @@ class MiniGdxKotlinMppPlugin : Plugin<Project> {
 
             if (project.findProperty(MiniGdxDeveloperExtension.IOS_MPP_PROPERTY) == "true") {
                 mpp.ios()
+                mpp.iosSimulatorArm64()
             }
 
             project.plugins.withId("com.android.library") {
@@ -113,13 +114,25 @@ class MiniGdxKotlinMppPlugin : Plugin<Project> {
                 }
 
                 if (project.findProperty(MiniGdxDeveloperExtension.IOS_MPP_PROPERTY) == "true") {
-                    getByName("iosMain") {
+                    val iosMain = getByName("iosMain") {
 
                     }
 
-                    getByName("iosTest") {
+                    val iosTest = getByName("iosTest") {
 
                     }
+
+                    val iosSimulatorArm64Main = getByName("iosSimulatorArm64Main") {
+
+                    }
+
+                    val iosSimulatorArm64Test = getByName("iosSimulatorArm64Test") {
+
+                    }
+
+                    // Set up dependencies between the source sets
+                    iosSimulatorArm64Main.dependsOn(iosMain)
+                    iosSimulatorArm64Test.dependsOn(iosTest)
                 }
 
                 project.plugins.withId("com.android.library") {
