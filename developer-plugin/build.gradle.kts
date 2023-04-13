@@ -52,6 +52,7 @@ gradlePlugin {
         description = """Configure MiniGDX libs with a common set of configuration and tasks.
                 | The usage is mainly for MiniGDX contributors.
             """.trimMargin()
+        tags.set(listOf("minigdx", "developer", "kotlin", "jvm", "mpp", "ios", "js", "android", "native"))
     }
 
     val mpp by plugins.creating {
