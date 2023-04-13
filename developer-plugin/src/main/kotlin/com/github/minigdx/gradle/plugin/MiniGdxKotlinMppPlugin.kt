@@ -156,6 +156,10 @@ class MiniGdxKotlinMppPlugin : Plugin<Project> {
                 it.languageSettings.apply {
                     this.optIn("kotlin.ExperimentalStdlibApi")
                     this.optIn("kotlinx.serialization.ExperimentalSerializationApi")
+
+                    if (project.findProperty(MiniGdxDeveloperExtension.K2_MPP_PROPERTY) == "true") {
+                        languageVersion = "2.0"
+                    }
                 }
             }
         }
