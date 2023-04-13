@@ -66,18 +66,18 @@ class Solution(val description: String, val documentedAt: String? = null) : JSol
     }
 }
 
-data class Context(val project: Project, val severity: Severity) {
+data class Context(val projectName: String, val gradleVersion: String, val severity: Severity) {
 
     override fun toString(): String {
         return when (severity) {
             Severity.EASY,
-            Severity.AVERAGE -> "Gradle module '${project.name}'"
-            Severity.GRAVE -> """Gradle module '${project.name}'
+            Severity.AVERAGE -> "Gradle module '$projectName'"
+            Severity.GRAVE -> """Gradle module '$projectName'
                 
                 OS name: '${System.getProperty("os.name")}'
                 JVM version: '${System.getProperty("java.version")}'
                 JVM name: '${System.getProperty("java.vendor")}'
-                Gradle version: '${project.gradle.gradleVersion}'
+                Gradle version: '$gradleVersion'
                 Plugin version: '${this::class.java.getPackage().implementationVersion}' 
                 """
         }
@@ -93,7 +93,8 @@ class MiniGdxException(
 
         fun create(
             severity: Severity,
-            project: Project,
+            projectName: String,
+            gradleVersion: String,
             because: String,
             description: String?,
             documentedAt: String? = null,
@@ -102,7 +103,7 @@ class MiniGdxException(
         ): MiniGdxException {
             val problem = MiniGdxProblem(
                 severity,
-                Context(project, severity),
+                Context(projectName, gradleVersion, severity),
                 { description },
                 { because },
                 { documentedAt },

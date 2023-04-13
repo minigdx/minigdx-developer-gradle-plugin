@@ -26,39 +26,43 @@ class MiniGdxKotlinJvmPlugin : Plugin<Project> {
     }
 
     private fun configureJava(project: Project) {
-        // Ensure "org.gradle.jvm.version" is set to "8" in Gradle metadata.
+        // Ensure "org.gradle.jvm.version" is set to "11" in Gradle metadata.
         project.afterEvaluate {
             val toolchainService = project.extensions.getByType(JavaToolchainService::class.java)
-            project.tasks.withType(JavaCompile::class.java) {
-                it.sourceCompatibility = "1.8"
-                it.targetCompatibility = "1.8"
+            project.tasks.withType(JavaCompile::class.java).configureEach {
+                it.sourceCompatibility = "11"
+                it.targetCompatibility = "11"
                 val javaCompiler = toolchainService.compilerFor {
-                    it.languageVersion.set(JavaLanguageVersion.of(JAVA_VERSION)) }
+                    it.languageVersion.set(JavaLanguageVersion.of(JAVA_VERSION))
+                }
                 it.javaCompiler.set(javaCompiler)
             }
         }
 
-        project.tasks.withType(Jar::class.java).whenTaskAdded {
-            val projectName = project.name
-            val projectVersion = project.version.toString()
+        val projectName = project.name
+        val projectVersion = project.version.toString()
 
-            project.tasks.withType(Jar::class.java) {
-                it.manifest {
-                    it.attributes(mapOf(
+        project.tasks.withType(Jar::class.java).configureEach {
+
+            it.manifest {
+                it.attributes(
+                    mapOf(
                         "Implementation-Title" to projectName,
                         "Implementation-Version" to projectVersion
-                    ))
-                }
+                    )
+                )
             }
         }
     }
 
     private fun configurePublication(project: Project) {
-        project.extensions.configure(PublishingExtension::class.java) {
-            it.publications {
-                it.create("maven", MavenPublication::class.java) {
-                    it.from(project.components.getByName("kotlin"))
-                    it.artifact(project.tasks.getByName("kotlinSourcesJar"))
+        project.afterEvaluate {
+            project.extensions.configure(PublishingExtension::class.java) {
+                it.publications {
+                    it.create("minigdxForMaven", MavenPublication::class.java) {
+                        it.from(project.components.getByName("kotlin"))
+                        it.artifact(project.tasks.getByName("kotlinSourcesJar"))
+                    }
                 }
             }
         }
@@ -76,7 +80,7 @@ class MiniGdxKotlinJvmPlugin : Plugin<Project> {
             project.dependencies.add("testFixturesImplementation", "org.jetbrains.kotlin:kotlin-reflect")
         }
 
-        project.tasks.withType(KotlinCompile::class.java).forEach {
+        project.tasks.withType(KotlinCompile::class.java).configureEach {
             it as UsesKotlinJavaToolchain
             val toolchainService = project.extensions.getByType(JavaToolchainService::class.java)
             it.kotlinJavaToolchain.toolchain.use(
@@ -87,7 +91,7 @@ class MiniGdxKotlinJvmPlugin : Plugin<Project> {
 
             it.kotlinOptions {
                 this as KotlinJvmOptions
-                this.jvmTarget = "1.8"
+                this.jvmTarget = "11"
                 this.freeCompilerArgs += COMPILATION_FLAGS
             }
         }

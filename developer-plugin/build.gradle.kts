@@ -1,3 +1,5 @@
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+
 @Suppress("DSL_SCOPE_VIOLATION")
 plugins {
     alias(libs.plugins.gradle.publish)
@@ -39,6 +41,9 @@ dependencies {
 }
 
 gradlePlugin {
+    website.set("https://github.com/minigdx/minigdx-developer-gradle-plugin")
+    vcsUrl.set("https://github.com/minigdx/minigdx-developer-gradle-plugin")
+
     // Define the plugin
     val developer by plugins.creating {
         id = "com.github.minigdx.gradle.plugin.developer"
@@ -56,6 +61,7 @@ gradlePlugin {
         description = """Configure MiniGDX libs to build for the JVM only.
                 | The usage is mainly for MiniGDX contributors.
             """.trimMargin()
+        tags.set(listOf("minigdx", "developer", "kotlin", "jvm", "mpp", "ios", "js", "android", "native"))
     }
 
     val jvm by plugins.creating {
@@ -65,27 +71,13 @@ gradlePlugin {
         description = """Configure MiniGDX libs to build for different platforms.
                 | The usage is mainly for MiniGDX contributors.
             """.trimMargin()
+        tags.set(listOf("minigdx", "developer", "kotlin", "jvm"))
     }
 }
 
-pluginBundle {
-    website = "https://github.com/minigdx/minigdx-developer-gradle-plugin"
-    vcsUrl = "https://github.com/minigdx/minigdx-developer-gradle-plugin"
-
-    tags = listOf("minigdx", "developer")
-
-    pluginTags = mapOf(
-        "jvm" to listOf("kotlin", "jvm"),
-        "mpp" to listOf("kotlin", "jvm", "mpp", "ios", "js", "android", "native")
-    )
-}
-
-val compileKotlin: org.jetbrains.kotlin.gradle.tasks.KotlinCompile by tasks
-compileKotlin.kotlinOptions.jvmTarget = "1.8"
 
 // Add a source set for the functional test suite
-val functionalTestSourceSet = sourceSets.create("functionalTest") {
-}
+val functionalTestSourceSet = sourceSets.create("functionalTest") {}
 
 gradlePlugin.testSourceSets(functionalTestSourceSet)
 configurations["functionalTestImplementation"].extendsFrom(configurations["testImplementation"])
@@ -101,20 +93,31 @@ tasks.check {
     dependsOn(functionalTest)
 }
 
-// Ensure "org.gradle.jvm.version" is set to "8" in Gradle metadata.
-tasks.withType<JavaCompile> {
-    sourceCompatibility = JavaVersion.VERSION_1_8.toString()
-    targetCompatibility = JavaVersion.VERSION_1_8.toString()
-}
-
+val javaVersion = JavaLanguageVersion.of(11)
 java {
     toolchain {
-        languageVersion.set(JavaLanguageVersion.of(11))
+        languageVersion.set(javaVersion)
     }
 }
 
 kotlin {
     jvmToolchain {
-        (this as JavaToolchainSpec).languageVersion.set(JavaLanguageVersion.of(11))
+        this.languageVersion.set(javaVersion)
     }
+}
+
+project.tasks.withType(KotlinCompile::class.java).configureEach {
+    kotlinOptions.jvmTarget = "11"
+    val toolchainService = project.extensions.getByType(JavaToolchainService::class.java)
+    kotlinJavaToolchain.toolchain.use(
+        toolchainService.launcherFor {
+            languageVersion.set(javaVersion)
+        }
+    )
+}
+
+// Ensure "org.gradle.jvm.version" is set to "11" in Gradle metadata.
+project.tasks.withType(JavaCompile::class.java).configureEach {
+    sourceCompatibility = JavaVersion.VERSION_11.toString()
+    targetCompatibility = JavaVersion.VERSION_11.toString()
 }

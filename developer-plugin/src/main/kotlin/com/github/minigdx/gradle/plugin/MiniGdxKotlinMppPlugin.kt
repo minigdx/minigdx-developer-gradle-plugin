@@ -23,12 +23,15 @@ class MiniGdxKotlinMppPlugin : Plugin<Project> {
 
     private fun configureTestTask(project: Project) {
         project.afterEvaluate {
-            if (project.rootProject.tasks.findByName("test") != null) {
-                return@afterEvaluate
-            }
-            project.tasks.register("test") {
-                it.group = "verification"
-                it.dependsOn("allTests")
+            // the test task might exist for example if a JVM plugin was applied, like application.
+            val testTask = project.tasks.findByName("test")
+            if (testTask != null) {
+                testTask.dependsOn("allTests")
+            } else {
+                project.tasks.register("test") {
+                    it.group = "verification"
+                    it.dependsOn("allTests")
+                }
             }
         }
     }
@@ -55,17 +58,18 @@ class MiniGdxKotlinMppPlugin : Plugin<Project> {
 
             mpp.jvm {
                 this.compilations.getByName("main").kotlinOptions.apply {
-                    jvmTarget = "1.8"
+                    jvmTarget = "11"
                     freeCompilerArgs = freeCompilerArgs + COMPILATION_FLAGS
                 }
                 this.compilations.getByName("test").kotlinOptions.apply {
-                    jvmTarget = "1.8"
+                    jvmTarget = "11"
                     freeCompilerArgs = freeCompilerArgs + COMPILATION_FLAGS
                 }
             }
 
             if (project.findProperty(MiniGdxDeveloperExtension.IOS_MPP_PROPERTY) == "true") {
                 mpp.ios()
+                mpp.iosSimulatorArm64()
             }
 
             project.plugins.withId("com.android.library") {
@@ -113,13 +117,25 @@ class MiniGdxKotlinMppPlugin : Plugin<Project> {
                 }
 
                 if (project.findProperty(MiniGdxDeveloperExtension.IOS_MPP_PROPERTY) == "true") {
-                    getByName("iosMain") {
+                    val iosMain = getByName("iosMain") {
 
                     }
 
-                    getByName("iosTest") {
+                    val iosTest = getByName("iosTest") {
 
                     }
+
+                    val iosSimulatorArm64Main = getByName("iosSimulatorArm64Main") {
+
+                    }
+
+                    val iosSimulatorArm64Test = getByName("iosSimulatorArm64Test") {
+
+                    }
+
+                    // Set up dependencies between the source sets
+                    iosSimulatorArm64Main.dependsOn(iosMain)
+                    iosSimulatorArm64Test.dependsOn(iosTest)
                 }
 
                 project.plugins.withId("com.android.library") {
@@ -129,7 +145,7 @@ class MiniGdxKotlinMppPlugin : Plugin<Project> {
                         }
                     }
 
-                    getByName("androidTest") {
+                    getByName("androidUnitTest") {
                         it.dependencies {
                             implementation(kotlin("test-junit"))
                         }
@@ -140,13 +156,17 @@ class MiniGdxKotlinMppPlugin : Plugin<Project> {
                 it.languageSettings.apply {
                     this.optIn("kotlin.ExperimentalStdlibApi")
                     this.optIn("kotlinx.serialization.ExperimentalSerializationApi")
+
+                    if (project.findProperty(MiniGdxDeveloperExtension.K2_MPP_PROPERTY) == "true") {
+                        languageVersion = "2.0"
+                    }
                 }
             }
         }
 
         project.afterEvaluate {
             val toolchainService = project.extensions.getByType(JavaToolchainService::class.java)
-            project.tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile::class.java).all {
+            project.tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile::class.java).configureEach {
                 it as UsesKotlinJavaToolchain
                 it.kotlinJavaToolchain.toolchain.use(
                     toolchainService.launcherFor {
@@ -154,16 +174,17 @@ class MiniGdxKotlinMppPlugin : Plugin<Project> {
                     }
                 )
                 it.kotlinOptions {
-                    jvmTarget = "1.8"
+                    jvmTarget = "11"
                     freeCompilerArgs = freeCompilerArgs + COMPILATION_FLAGS
                 }
             }
 
-            project.tasks.withType(JavaCompile::class.java) {
-                it.sourceCompatibility = "1.8"
-                it.targetCompatibility = "1.8"
+            project.tasks.withType(JavaCompile::class.java).configureEach {
+                it.sourceCompatibility = "11"
+                it.targetCompatibility = "11"
                 val javaCompiler = toolchainService.compilerFor {
-                    it.languageVersion.set(JavaLanguageVersion.of(JAVA_VERSION)) }
+                    it.languageVersion.set(JavaLanguageVersion.of(JAVA_VERSION))
+                }
                 it.javaCompiler.set(javaCompiler)
             }
         }

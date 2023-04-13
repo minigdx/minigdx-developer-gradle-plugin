@@ -3,7 +3,6 @@
  */
 package com.github.minigdx.gradle.plugin
 
-import java.io.File
 import org.gradle.testkit.runner.GradleRunner
 import org.gradle.testkit.runner.TaskOutcome
 import org.junit.Rule
@@ -20,26 +19,66 @@ class MinigdxKotlinJvmPluginFunctionalTest {
     @get:Rule
     val temporaryFolder: TemporaryFolder = TemporaryFolder()
 
-    @Test fun `can build`() {
+    @Test
+    fun `can build`() {
         // Setup the test build
         val projectDir = temporaryFolder.newFolder("build", "functionalTest")
         projectDir.mkdirs()
-        projectDir.resolve("settings.gradle").writeText("")
-        projectDir.resolve("build.gradle").writeText("""
+        projectDir.resolve("settings.gradle").writeText("""
+plugins {
+    id("org.gradle.toolchains.foojay-resolver-convention") version("0.4.0")
+}
+""")
+        projectDir.resolve("build.gradle").writeText(
+            """
             plugins {
                 id('com.github.minigdx.gradle.plugin.developer.jvm')
             }
-        """)
+        """
+        )
 
         // Run the build
-        val runner = GradleRunner.create()
-        runner.forwardOutput()
-        runner.withPluginClasspath()
-        runner.withArguments("build")
-        runner.withProjectDir(projectDir)
-        val result = runner.build();
+        val result = GradleRunner.create()
+            .forwardOutput()
+            .withPluginClasspath().withArguments("build")
+            .withProjectDir(projectDir)
+            .build()
 
         // Verify the result
         assertEquals(TaskOutcome.SUCCESS, result.task(":build")?.outcome)
+    }
+
+    @Test
+    fun `can build with configuration cache`() {
+        // Setup the test build
+        val projectDir = temporaryFolder.newFolder("build", "functionalTest")
+        projectDir.mkdirs()
+        projectDir.resolve("settings.gradle").writeText("""
+plugins {
+    id("org.gradle.toolchains.foojay-resolver-convention") version("0.4.0")
+}
+""")
+        projectDir.resolve("build.gradle").writeText(
+            """
+            plugins {
+                id('com.github.minigdx.gradle.plugin.developer.jvm')
+            }
+        """
+        )
+
+        // Run the build
+        GradleRunner.create()
+            .forwardOutput()
+            .withPluginClasspath().withArguments("build", "--configuration-cache")
+            .withProjectDir(projectDir)
+            .build()
+        val result = GradleRunner.create()
+            .forwardOutput()
+            .withPluginClasspath().withArguments("build", "--configuration-cache")
+            .withProjectDir(projectDir)
+            .build()
+
+        // Verify the result
+        assertTrue(result.output.contains("Reusing configuration cache."))
     }
 }

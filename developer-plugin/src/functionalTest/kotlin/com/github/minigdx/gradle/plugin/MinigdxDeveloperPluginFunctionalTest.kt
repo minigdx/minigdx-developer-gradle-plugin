@@ -3,7 +3,6 @@
  */
 package com.github.minigdx.gradle.plugin
 
-import java.io.File
 import org.gradle.testkit.runner.GradleRunner
 import org.gradle.testkit.runner.TaskOutcome
 import org.junit.Rule
@@ -24,7 +23,12 @@ class MinigdxDeveloperPluginFunctionalTest {
         // Setup the test build
         val projectDir = temporaryFolder.newFolder("build", "functionalTest")
         projectDir.mkdirs()
-        projectDir.resolve("settings.gradle").writeText("")
+        projectDir.resolve("settings.gradle").writeText("""
+            plugins {
+                id("org.gradle.toolchains.foojay-resolver-convention") version("0.4.0")
+            }
+        """.trimIndent())
+
         projectDir.resolve("build.gradle").writeText("""
             plugins {
                 id('com.github.minigdx.gradle.plugin.developer')
@@ -49,7 +53,11 @@ class MinigdxDeveloperPluginFunctionalTest {
         // Setup the test build
         val projectDir = temporaryFolder.newFolder("build", "functionalTest")
         projectDir.mkdirs()
-        projectDir.resolve("settings.gradle").writeText("")
+        projectDir.resolve("settings.gradle").writeText("""
+plugins {
+    id("org.gradle.toolchains.foojay-resolver-convention") version("0.4.0")
+}
+""")
         projectDir.resolve("build.gradle").writeText("""
             plugins {
                 id('com.github.minigdx.gradle.plugin.developer')
