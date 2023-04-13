@@ -26,12 +26,12 @@ class MiniGdxKotlinJvmPlugin : Plugin<Project> {
     }
 
     private fun configureJava(project: Project) {
-        // Ensure "org.gradle.jvm.version" is set to "8" in Gradle metadata.
+        // Ensure "org.gradle.jvm.version" is set to "11" in Gradle metadata.
         project.afterEvaluate {
             val toolchainService = project.extensions.getByType(JavaToolchainService::class.java)
             project.tasks.withType(JavaCompile::class.java).configureEach {
-                it.sourceCompatibility = "1.8"
-                it.targetCompatibility = "1.8"
+                it.sourceCompatibility = "11"
+                it.targetCompatibility = "11"
                 val javaCompiler = toolchainService.compilerFor {
                     it.languageVersion.set(JavaLanguageVersion.of(JAVA_VERSION))
                 }
@@ -91,7 +91,7 @@ class MiniGdxKotlinJvmPlugin : Plugin<Project> {
 
             it.kotlinOptions {
                 this as KotlinJvmOptions
-                this.jvmTarget = "1.8"
+                this.jvmTarget = "11"
                 this.freeCompilerArgs += COMPILATION_FLAGS
             }
         }

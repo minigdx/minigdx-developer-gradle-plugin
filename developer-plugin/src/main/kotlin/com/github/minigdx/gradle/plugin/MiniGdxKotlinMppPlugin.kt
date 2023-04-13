@@ -23,12 +23,15 @@ class MiniGdxKotlinMppPlugin : Plugin<Project> {
 
     private fun configureTestTask(project: Project) {
         project.afterEvaluate {
-            if (project.rootProject.tasks.findByName("test") != null) {
-                return@afterEvaluate
-            }
-            project.tasks.register("test") {
-                it.group = "verification"
-                it.dependsOn("allTests")
+            // the test task might exist for example if a JVM plugin was applied, like application.
+            val testTask = project.tasks.findByName("test")
+            if (testTask != null) {
+                testTask.dependsOn("allTests")
+            } else {
+                project.tasks.register("test") {
+                    it.group = "verification"
+                    it.dependsOn("allTests")
+                }
             }
         }
     }
@@ -55,11 +58,11 @@ class MiniGdxKotlinMppPlugin : Plugin<Project> {
 
             mpp.jvm {
                 this.compilations.getByName("main").kotlinOptions.apply {
-                    jvmTarget = "1.8"
+                    jvmTarget = "11"
                     freeCompilerArgs = freeCompilerArgs + COMPILATION_FLAGS
                 }
                 this.compilations.getByName("test").kotlinOptions.apply {
-                    jvmTarget = "1.8"
+                    jvmTarget = "11"
                     freeCompilerArgs = freeCompilerArgs + COMPILATION_FLAGS
                 }
             }
@@ -167,16 +170,17 @@ class MiniGdxKotlinMppPlugin : Plugin<Project> {
                     }
                 )
                 it.kotlinOptions {
-                    jvmTarget = "1.8"
+                    jvmTarget = "11"
                     freeCompilerArgs = freeCompilerArgs + COMPILATION_FLAGS
                 }
             }
 
             project.tasks.withType(JavaCompile::class.java).configureEach {
-                it.sourceCompatibility = "1.8"
-                it.targetCompatibility = "1.8"
+                it.sourceCompatibility = "11"
+                it.targetCompatibility = "11"
                 val javaCompiler = toolchainService.compilerFor {
-                    it.languageVersion.set(JavaLanguageVersion.of(JAVA_VERSION)) }
+                    it.languageVersion.set(JavaLanguageVersion.of(JAVA_VERSION))
+                }
                 it.javaCompiler.set(javaCompiler)
             }
         }

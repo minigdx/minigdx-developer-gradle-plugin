@@ -107,7 +107,7 @@ kotlin {
 }
 
 project.tasks.withType(KotlinCompile::class.java).configureEach {
-    kotlinOptions.jvmTarget = "1.8"
+    kotlinOptions.jvmTarget = "11"
     val toolchainService = project.extensions.getByType(JavaToolchainService::class.java)
     kotlinJavaToolchain.toolchain.use(
         toolchainService.launcherFor {
@@ -116,8 +116,8 @@ project.tasks.withType(KotlinCompile::class.java).configureEach {
     )
 }
 
-// Ensure "org.gradle.jvm.version" is set to "8" in Gradle metadata.
+// Ensure "org.gradle.jvm.version" is set to "11" in Gradle metadata.
 project.tasks.withType(JavaCompile::class.java).configureEach {
-    sourceCompatibility = JavaVersion.VERSION_1_8.toString()
-    targetCompatibility = JavaVersion.VERSION_1_8.toString()
+    sourceCompatibility = JavaVersion.VERSION_11.toString()
+    targetCompatibility = JavaVersion.VERSION_11.toString()
 }
