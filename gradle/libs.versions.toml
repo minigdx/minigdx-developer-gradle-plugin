@@ -1,7 +1,7 @@
 [versions]
 kotlin = "1.8.20"
 kotlin-dokka = "1.7.20"
-ktlint = "11.1.0"
+ktlint = "11.3.2"
 jdoctor = "0.1.2"
 gradlePublish = "1.1.0"
 

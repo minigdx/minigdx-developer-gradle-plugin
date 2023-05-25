@@ -158,7 +158,9 @@ class MiniGdxDeveloperPlugin : Plugin<Project> {
     }
 
     private fun configureLinter(project: Project) {
-        project.apply { it.plugin("org.jlleitschuh.gradle.ktlint") }
+        if(project.findProperty(MiniGdxDeveloperExtension.KTLINT_PROPERTY) != "false") {
+            project.apply { it.plugin("org.jlleitschuh.gradle.ktlint") }
+        }
     }
 
     private fun copy(projectName: String, gradleVersion: String, filename: String, target: File) {
