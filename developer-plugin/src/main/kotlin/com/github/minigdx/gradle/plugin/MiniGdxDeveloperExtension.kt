@@ -66,6 +66,7 @@ open class MiniGdxDeveloperExtension(private val project: Project) {
 
         val IOS_MPP_PROPERTY = "minigdx.mpp.ios"
         val K2_MPP_PROPERTY = "minigdx.mpp.k2"
+        val KTLINT_PROPERTY = "mnigdx.ktlint"
     }
 }
 
