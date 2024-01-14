@@ -133,7 +133,7 @@ class MiniGdxDeveloperPlugin : Plugin<Project> {
         project.tasks.register("javadocJar", Jar::class.java) {
             it.dependsOn(project.tasks.getByName("dokkaHtml"))
             it.archiveClassifier.set("javadoc")
-            it.from(project.buildDir.resolve("dokka"))
+            it.from(project.layout.buildDirectory.dir("dokka"))
         }
 
         project.tasks.withType(DokkaTask::class.java).configureEach { dokka ->
