@@ -1,9 +1,9 @@
 [versions]
-kotlin = "1.8.20"
-kotlin-dokka = "1.7.20"
-ktlint = "11.3.2"
+kotlin = "1.9.22"
+kotlin-dokka = "1.9.10"
+ktlint = "12.1.0"
 jdoctor = "0.1.2"
-gradlePublish = "1.1.0"
+gradlePublish = "1.2.1"
 
 [libraries]
 kotlin-bom = { module = "org.jetbrains.kotlin:kotlin-bom" }

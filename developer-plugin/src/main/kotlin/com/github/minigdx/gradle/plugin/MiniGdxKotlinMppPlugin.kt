@@ -48,7 +48,7 @@ class MiniGdxKotlinMppPlugin : Plugin<Project> {
                 }
                 this.browser {
                     this.webpackTask {
-                        this.compilation.kotlinOptions {
+                        it.compilation.kotlinOptions {
                             this.sourceMap = true
                             this.sourceMapEmbedSources = "always"
                         }
@@ -68,12 +68,12 @@ class MiniGdxKotlinMppPlugin : Plugin<Project> {
             }
 
             if (project.findProperty(MiniGdxDeveloperExtension.IOS_MPP_PROPERTY) == "true") {
-                mpp.ios()
+                mpp.iosArm64()
                 mpp.iosSimulatorArm64()
             }
 
             project.plugins.withId("com.android.library") {
-                mpp.android {
+                mpp.androidTarget {
                     publishLibraryVariants("release", "debug")
                 }
             }
