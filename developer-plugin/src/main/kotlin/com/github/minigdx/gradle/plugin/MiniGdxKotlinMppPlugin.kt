@@ -8,6 +8,7 @@ import org.gradle.jvm.toolchain.JavaLanguageVersion
 import org.gradle.jvm.toolchain.JavaToolchainService
 import org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension
 import org.jetbrains.kotlin.gradle.plugin.KotlinJsCompilerType
+import org.jetbrains.kotlin.gradle.targets.js.dsl.ExperimentalWasmDsl
 import org.jetbrains.kotlin.gradle.tasks.UsesKotlinJavaToolchain
 
 /**
@@ -36,6 +37,7 @@ class MiniGdxKotlinMppPlugin : Plugin<Project> {
         }
     }
 
+    @OptIn(ExperimentalWasmDsl::class)
     private fun configureKotlinMultiplatform(project: Project) {
         project.apply { it.plugin("org.jetbrains.kotlin.multiplatform") }
         project.extensions.configure<KotlinMultiplatformExtension>("kotlin") { mpp ->
@@ -70,6 +72,11 @@ class MiniGdxKotlinMppPlugin : Plugin<Project> {
             if (project.findProperty(MiniGdxDeveloperExtension.IOS_MPP_PROPERTY) == "true") {
                 mpp.iosArm64()
                 mpp.iosSimulatorArm64()
+            }
+
+            if(project.findProperty(MiniGdxDeveloperExtension.WASM_MPP_PROPERTY) == "true") {
+                mpp.wasmJs()
+                mpp.wasmWasi()
             }
 
             project.plugins.withId("com.android.library") {
