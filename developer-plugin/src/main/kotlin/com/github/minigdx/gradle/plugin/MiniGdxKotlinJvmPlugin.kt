@@ -1,6 +1,7 @@
 package com.github.minigdx.gradle.plugin
 
 import com.github.minigdx.gradle.plugin.internal.Constants.JAVA_VERSION
+import com.github.minigdx.gradle.plugin.internal.Constants.JVM_TARGET
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.publish.PublishingExtension
@@ -9,8 +10,7 @@ import org.gradle.api.tasks.compile.JavaCompile
 import org.gradle.jvm.tasks.Jar
 import org.gradle.jvm.toolchain.JavaLanguageVersion
 import org.gradle.jvm.toolchain.JavaToolchainService
-import org.jetbrains.kotlin.gradle.dsl.KotlinCompile
-import org.jetbrains.kotlin.gradle.dsl.KotlinJvmOptions
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompilationTask
 import org.jetbrains.kotlin.gradle.tasks.UsesKotlinJavaToolchain
 
 /**
@@ -26,12 +26,12 @@ class MiniGdxKotlinJvmPlugin : Plugin<Project> {
     }
 
     private fun configureJava(project: Project) {
-        // Ensure "org.gradle.jvm.version" is set to "11" in Gradle metadata.
+        // Ensure "org.gradle.jvm.version" is set to "17" in Gradle metadata.
         project.afterEvaluate {
             val toolchainService = project.extensions.getByType(JavaToolchainService::class.java)
             project.tasks.withType(JavaCompile::class.java).configureEach {
-                it.sourceCompatibility = "11"
-                it.targetCompatibility = "11"
+                it.sourceCompatibility = JVM_TARGET
+                it.targetCompatibility = JVM_TARGET
                 val javaCompiler = toolchainService.compilerFor {
                     it.languageVersion.set(JavaLanguageVersion.of(JAVA_VERSION))
                 }
@@ -80,7 +80,10 @@ class MiniGdxKotlinJvmPlugin : Plugin<Project> {
             project.dependencies.add("testFixturesImplementation", "org.jetbrains.kotlin:kotlin-reflect")
         }
 
-        project.tasks.withType(KotlinCompile::class.java).configureEach {
+        project.tasks.withType(KotlinCompilationTask::class.java).configureEach {
+            it.compilerOptions {
+                freeCompilerArgs.addAll(COMPILATION_FLAGS)
+            }
             it as UsesKotlinJavaToolchain
             val toolchainService = project.extensions.getByType(JavaToolchainService::class.java)
             it.kotlinJavaToolchain.toolchain.use(
@@ -88,12 +91,6 @@ class MiniGdxKotlinJvmPlugin : Plugin<Project> {
                     it.languageVersion.set(JavaLanguageVersion.of(JAVA_VERSION))
                 }
             )
-
-            it.kotlinOptions {
-                this as KotlinJvmOptions
-                this.jvmTarget = "11"
-                this.freeCompilerArgs += COMPILATION_FLAGS
-            }
         }
     }
 

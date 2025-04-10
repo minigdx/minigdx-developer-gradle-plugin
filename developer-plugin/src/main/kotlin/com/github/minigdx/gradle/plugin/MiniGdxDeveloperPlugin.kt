@@ -12,10 +12,12 @@ import org.gradle.api.Project
 import org.gradle.api.publish.PublishingExtension
 import org.gradle.api.publish.maven.MavenPublication
 import org.gradle.api.publish.maven.tasks.PublishToMavenRepository
+import org.gradle.internal.extensions.core.extra
 import org.gradle.jvm.tasks.Jar
 import org.gradle.plugins.signing.SigningExtension
 import org.gradle.util.GradleVersion
 import org.jetbrains.dokka.gradle.DokkaTask
+import org.jetbrains.kotlin.gradle.plugin.extraProperties
 import java.io.File
 import java.net.URI
 
@@ -127,8 +129,15 @@ class MiniGdxDeveloperPlugin : Plugin<Project> {
     }
 
     private fun configureDokka(project: Project) {
+        if(project.extraProperties.has(MiniGdxDeveloperExtension.DOKKA_SKIP_PROPERTY)) {
+            return
+        }
         // TODO - [CACHE] Dokka doesn't support Configuration Cache yet
         //      See: https://github.com/Kotlin/dokka/issues/2231
+        project.extensions.extraProperties.set(
+            "org.jetbrains.dokka.experimental.gradle.pluginMode",
+            "V2EnabledWithHelpers"
+        )
         project.apply { it.plugin("org.jetbrains.dokka") }
         project.tasks.register("javadocJar", Jar::class.java) {
             it.dependsOn(project.tasks.getByName("dokkaHtml"))

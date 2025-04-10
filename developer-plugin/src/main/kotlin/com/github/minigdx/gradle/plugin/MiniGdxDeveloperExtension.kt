@@ -68,6 +68,7 @@ open class MiniGdxDeveloperExtension(private val project: Project) {
         val WASM_MPP_PROPERTY = "minigdx.mpp.wasm"
         val K2_MPP_PROPERTY = "minigdx.mpp.k2"
         val KTLINT_PROPERTY = "mnigdx.ktlint"
+        val DOKKA_SKIP_PROPERTY = "minigdx.dokka.skip"
     }
 }
 

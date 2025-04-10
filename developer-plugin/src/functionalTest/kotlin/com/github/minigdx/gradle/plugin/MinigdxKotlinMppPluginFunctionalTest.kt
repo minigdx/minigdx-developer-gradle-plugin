@@ -5,10 +5,10 @@ package com.github.minigdx.gradle.plugin
 
 import org.gradle.testkit.runner.GradleRunner
 import org.gradle.testkit.runner.TaskOutcome
-import org.junit.Ignore
-import org.junit.Rule
-import org.junit.rules.TemporaryFolder
-import kotlin.test.Test
+import org.junit.jupiter.api.Disabled
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.io.TempDir
+import java.io.File
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
@@ -17,13 +17,15 @@ import kotlin.test.assertTrue
  */
 class MinigdxKotlinMppPluginFunctionalTest {
 
-    @get:Rule
-    val temporaryFolder: TemporaryFolder = TemporaryFolder()
+    @TempDir
+    lateinit var projectDir: File
 
-    @Test fun `can build`() {
+    @Test
+    fun `can build`() {
         // Setup the test build
-        val projectDir = temporaryFolder.newFolder("build", "functionalTest")
-        projectDir.mkdirs()
+        val buildDir = projectDir.resolve("build")
+        val functionalTestDir = projectDir.resolve("functionalTest")
+        functionalTestDir.mkdirs()
         projectDir.resolve("settings.gradle").writeText("""
 plugins {
     id("org.gradle.toolchains.foojay-resolver-convention") version("0.4.0")
@@ -48,11 +50,9 @@ plugins {
     }
 
     @Test
-    @Ignore("Configuration Cache not yet supported by Kotlin Multiplatform")
+    @Disabled("Configuration Cache not yet supported by Kotlin Multiplatform")
     fun `can build with configuration cache`() {
         // Setup the test build
-        val projectDir = temporaryFolder.newFolder("build", "functionalTest")
-        projectDir.mkdirs()
         projectDir.resolve("settings.gradle").writeText("""
 plugins {
     id("org.gradle.toolchains.foojay-resolver-convention") version("0.4.0")
@@ -64,7 +64,7 @@ plugins {
             }
         """)
 
-        // Run the build
+        // Run the build (first run to populate cache)
         GradleRunner.create()
             .forwardOutput()
             .withPluginClasspath()
@@ -72,12 +72,13 @@ plugins {
             .withProjectDir(projectDir)
             .build()
 
+        // Run the build again and check for cache reuse
         val result = GradleRunner.create()
-        .forwardOutput()
-        .withPluginClasspath()
-        .withArguments("build", "--configuration-cache")
-        .withProjectDir(projectDir)
-       .build()
+            .forwardOutput()
+            .withPluginClasspath()
+            .withArguments("build", "--configuration-cache")
+            .withProjectDir(projectDir)
+            .build()
 
         // Verify the result
         assertTrue(result.output.contains("Reusing configuration cache."))
