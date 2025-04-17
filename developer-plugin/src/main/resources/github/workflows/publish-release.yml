@@ -25,4 +25,4 @@ jobs:
           java-version: 17
 
       - name: Publish artifact
-        run: ./gradlew publishAllPublicationsToMavenCentralRepository -Pversion="${{github.event.release.tag_name}}" -Psigning.base64.secretKey="${{secrets.SIGNING_BASE_64_SECRET_KEY}}" -Psigning.password="${{secrets.SIGNING_PASSWORD}}" -PsonatypeUsername="${{secrets.SONATYPE_USERNAME}}" -PsonatypePassword="${{secrets.SONATYPE_PASSWORD}}"
+        run: ./gradlew publishAllPublicationToProjectLocalRepository zipMavenCentralPortalPublication releaseMavenCentralPortalPublication -Pversion="${{github.event.release.tag_name}}" -Psigning.base64.secretKey="${{secrets.SIGNING_BASE_64_SECRET_KEY}}" -Psigning.password="${{secrets.SIGNING_PASSWORD}}" -PcentralUsername="${{secrets.SONATYPE_USERNAME}}" -PcentralPassword="${{secrets.SONATYPE_PASSWORD}}"
