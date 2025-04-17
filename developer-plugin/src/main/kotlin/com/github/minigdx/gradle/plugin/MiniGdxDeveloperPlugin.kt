@@ -8,6 +8,8 @@ import com.github.minigdx.gradle.plugin.internal.MiniGdxException.Companion.ISSU
 import com.github.minigdx.gradle.plugin.internal.Severity
 import com.github.minigdx.gradle.plugin.internal.Solution
 import org.danilopianini.gradle.mavencentral.PublishOnCentralExtension
+import org.danilopianini.gradle.mavencentral.portal.PublishPortalDeployment.Companion.RELEASE_TASK_NAME
+import org.danilopianini.gradle.mavencentral.tasks.ZipMavenCentralPortalPublication
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.publish.PublishingExtension
@@ -78,11 +80,6 @@ class MiniGdxDeveloperPlugin : Plugin<Project> {
             project.extensions.configure(PublishingExtension::class.java) {
                 // Configure publication (what to publish)
                 it.publications.withType(MavenPublication::class.java).configureEach {
-                    if (it.name != "pluginMaven") {
-                        // TODO: [CACHE] Create variable. Push it outside lambda
-                        it.artifact(project.tasks.getByName("javadocJar"))
-                    }
-
                     it.pom {
                         it.name.set(ext.name)
                         it.description.set(ext.description)
@@ -115,16 +112,6 @@ class MiniGdxDeveloperPlugin : Plugin<Project> {
                 }
             }
         }
-        project.tasks.withType(PublishToMavenRepository::class.java).configureEach { publication ->
-            publication.onlyIf {
-                // publish on sonatype only if the username is configured.
-                (publication.name.startsWith("sonatype") &&
-                        // TODO: [CACHE] Might need to do something about that.
-                        project.properties["sonatype.username"]?.toString()?.isNotBlank() == true) ||
-                        !publication.name.startsWith("sonatype")
-            }
-
-        }
     }
 
     private fun configureDokka(project: Project) {
@@ -138,18 +125,6 @@ class MiniGdxDeveloperPlugin : Plugin<Project> {
             "V2EnabledWithHelpers"
         )
         project.apply { it.plugin("org.jetbrains.dokka") }
-        project.tasks.register("javadocJar", Jar::class.java) {
-            it.dependsOn(project.tasks.getByName("dokkaHtml"))
-            it.archiveClassifier.set("javadoc")
-            it.from(project.layout.buildDirectory.dir("dokka"))
-        }
-
-        project.tasks.withType(DokkaTask::class.java).configureEach { dokka ->
-            dokka.notCompatibleWithConfigurationCache(
-                "The dokka tasks are not compatible yet " +
-                        "with the configuration cache."
-            )
-        }
     }
 
     private fun configureProjectRepository(project: Project) {
@@ -241,6 +216,17 @@ class MiniGdxDeveloperPlugin : Plugin<Project> {
                         project.properties["signing.password"].toString()
                     )
                 }
+            }
+
+            project.tasks.withType(ZipMavenCentralPortalPublication::class.java) {
+                // Adjust the version as the task is created BEFORE the version is computed
+                // from the minigdx gradle plugin.
+                it.archiveVersion.set(project.version.toString())
+            }
+
+            // Disable the release task for modules without artifacts (root project, for example)
+            project.tasks.named(RELEASE_TASK_NAME).configure {
+                it.onlyIf { project.layout.buildDirectory.dir("maven-central-portal").get().asFile.exists() }
             }
         }
     }
