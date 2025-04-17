@@ -4,6 +4,7 @@ kotlin-dokka = "2.0.0"
 ktlint = "12.2.0"
 jdoctor = "0.1.2"
 gradlePublish = "1.2.1"
+publish-on-central = "8.0.6"
 
 [libraries]
 kotlin-bom = { module = "org.jetbrains.kotlin:kotlin-bom", version.ref = "kotlin" }
@@ -19,6 +20,7 @@ jdoctor-bom = {module = "me.champeau.jdoctor:jdoctor-bom", version.ref = "jdocto
 jdoctor-core = {module = "me.champeau.jdoctor:jdoctor-core" }
 jdoctor-utils = {module = "me.champeau.jdoctor:jdoctor-utils", version.ref = "jdoctor" }
 
+publish-on-central-plugin = { module = "org.danilopianini.publish-on-central:org.danilopianini.publish-on-central.gradle.plugin", version.ref = "publish-on-central" }
 
 [bundles]
 test = ["kotlin-test", "kotlin-test-junit"]

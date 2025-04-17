@@ -37,6 +37,8 @@ dependencies {
     implementation(libs.jdoctor.core)
     implementation(libs.jdoctor.utils)
 
+    implementation(libs.publish.on.central.plugin)
+
     // Use the Kotlin test library.
     testImplementation(libs.bundles.test)
 }
