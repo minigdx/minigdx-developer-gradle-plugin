@@ -5,8 +5,8 @@ package com.github.minigdx.gradle.plugin
 
 import org.gradle.testkit.runner.GradleRunner
 import org.gradle.testkit.runner.TaskOutcome
-import org.junit.Rule
-import org.junit.rules.TemporaryFolder
+import org.junit.jupiter.api.io.TempDir
+import java.io.File
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
@@ -15,13 +15,12 @@ import kotlin.test.assertTrue
  * A simple functional test for the 'com.github.minigdx.gradle.plugin.greeting' plugin.
  */
 class MinigdxDeveloperPluginFunctionalTest {
-
-    @get:Rule
-    val temporaryFolder: TemporaryFolder = TemporaryFolder()
+    @TempDir
+    lateinit var temporaryFolder: File
 
     @Test fun `can create github workflow`() {
         // Setup the test build
-        val projectDir = temporaryFolder.newFolder("build", "functionalTest")
+        val projectDir = File(temporaryFolder, "build/functionalTest")
         projectDir.mkdirs()
         projectDir.resolve("settings.gradle").writeText("""
             plugins {
@@ -51,7 +50,7 @@ class MinigdxDeveloperPluginFunctionalTest {
 
     @Test fun `can create makefile`() {
         // Setup the test build
-        val projectDir = temporaryFolder.newFolder("build", "functionalTest")
+        val projectDir = File(temporaryFolder, "build/functionalTest")
         projectDir.mkdirs()
         projectDir.resolve("settings.gradle").writeText("""
 plugins {

@@ -1,3 +1,4 @@
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 @Suppress("DSL_SCOPE_VIOLATION")
@@ -35,6 +36,8 @@ dependencies {
     implementation(platform(libs.jdoctor.bom))
     implementation(libs.jdoctor.core)
     implementation(libs.jdoctor.utils)
+
+    implementation(libs.publish.on.central.plugin)
 
     // Use the Kotlin test library.
     testImplementation(libs.bundles.test)
@@ -94,7 +97,7 @@ tasks.check {
     dependsOn(functionalTest)
 }
 
-val javaVersion = JavaLanguageVersion.of(11)
+val javaVersion = JavaLanguageVersion.of(17)
 java {
     toolchain {
         languageVersion.set(javaVersion)
@@ -108,7 +111,9 @@ kotlin {
 }
 
 project.tasks.withType(KotlinCompile::class.java).configureEach {
-    kotlinOptions.jvmTarget = "11"
+    compilerOptions {
+        jvmTarget.set(JvmTarget.JVM_17)
+    }
     val toolchainService = project.extensions.getByType(JavaToolchainService::class.java)
     kotlinJavaToolchain.toolchain.use(
         toolchainService.launcherFor {
@@ -117,8 +122,17 @@ project.tasks.withType(KotlinCompile::class.java).configureEach {
     )
 }
 
-// Ensure "org.gradle.jvm.version" is set to "11" in Gradle metadata.
+// Ensure "org.gradle.jvm.version" is set to "17" in Gradle metadata.
 project.tasks.withType(JavaCompile::class.java).configureEach {
-    sourceCompatibility = JavaVersion.VERSION_11.toString()
-    targetCompatibility = JavaVersion.VERSION_11.toString()
+    sourceCompatibility = JavaVersion.VERSION_17.toString()
+    targetCompatibility = JavaVersion.VERSION_17.toString()
+}
+
+testing.suites {
+    withType<JvmTestSuite>().configureEach {
+        useJUnitJupiter()
+        dependencies {
+            implementation(gradleTestKit())
+        }
+    }
 }

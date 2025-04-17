@@ -1,11 +1,14 @@
 package com.github.minigdx.gradle.plugin
 
 import com.github.minigdx.gradle.plugin.internal.Constants.JAVA_VERSION
+import com.github.minigdx.gradle.plugin.internal.Constants.JVM_TARGET
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.tasks.compile.JavaCompile
 import org.gradle.jvm.toolchain.JavaLanguageVersion
 import org.gradle.jvm.toolchain.JavaToolchainService
+import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
+import org.jetbrains.kotlin.gradle.dsl.JsSourceMapEmbedMode
 import org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension
 import org.jetbrains.kotlin.gradle.plugin.KotlinJsCompilerType
 import org.jetbrains.kotlin.gradle.tasks.UsesKotlinJavaToolchain
@@ -36,44 +39,52 @@ class MiniGdxKotlinMppPlugin : Plugin<Project> {
         }
     }
 
+    @OptIn(ExperimentalWasmDsl::class)
     private fun configureKotlinMultiplatform(project: Project) {
         project.apply { it.plugin("org.jetbrains.kotlin.multiplatform") }
         project.extensions.configure<KotlinMultiplatformExtension>("kotlin") { mpp ->
             mpp.js(KotlinJsCompilerType.IR) {
                 this.binaries.executable()
-                this.compilations.all {
-                    it.kotlinOptions {
-                        freeCompilerArgs = freeCompilerArgs + COMPILATION_FLAGS
-                    }
+                this.compilerOptions {
+                    this.freeCompilerArgs.addAll(COMPILATION_FLAGS)
+                    sourceMap.set(true)
+                    sourceMapEmbedSources.set(JsSourceMapEmbedMode.SOURCE_MAP_SOURCE_CONTENT_ALWAYS)
                 }
+
                 this.browser {
                     this.webpackTask {
-                        this.compilation.kotlinOptions {
-                            this.sourceMap = true
-                            this.sourceMapEmbedSources = "always"
-                        }
+
                     }
                 }
             }
 
             mpp.jvm {
-                this.compilations.getByName("main").kotlinOptions.apply {
-                    jvmTarget = "11"
-                    freeCompilerArgs = freeCompilerArgs + COMPILATION_FLAGS
-                }
-                this.compilations.getByName("test").kotlinOptions.apply {
-                    jvmTarget = "11"
-                    freeCompilerArgs = freeCompilerArgs + COMPILATION_FLAGS
+                compilerOptions {
+                    compilations.getByName("main").kotlinOptions.apply {
+                        jvmTarget = JVM_TARGET
+                        freeCompilerArgs = freeCompilerArgs + COMPILATION_FLAGS
+                    }
+                    compilations.getByName("test").kotlinOptions.apply {
+                        jvmTarget = JVM_TARGET
+                        freeCompilerArgs = freeCompilerArgs + COMPILATION_FLAGS
+                    }
+
+
                 }
             }
 
             if (project.findProperty(MiniGdxDeveloperExtension.IOS_MPP_PROPERTY) == "true") {
-                mpp.ios()
+                mpp.iosArm64()
                 mpp.iosSimulatorArm64()
             }
 
+            if(project.findProperty(MiniGdxDeveloperExtension.WASM_MPP_PROPERTY) == "true") {
+                mpp.wasmJs()
+                mpp.wasmWasi()
+            }
+
             project.plugins.withId("com.android.library") {
-                mpp.android {
+                mpp.androidTarget {
                     publishLibraryVariants("release", "debug")
                 }
             }
@@ -173,15 +184,11 @@ class MiniGdxKotlinMppPlugin : Plugin<Project> {
                         it.languageVersion.set(JavaLanguageVersion.of(JAVA_VERSION))
                     }
                 )
-                it.kotlinOptions {
-                    jvmTarget = "11"
-                    freeCompilerArgs = freeCompilerArgs + COMPILATION_FLAGS
-                }
             }
 
             project.tasks.withType(JavaCompile::class.java).configureEach {
-                it.sourceCompatibility = "11"
-                it.targetCompatibility = "11"
+                it.sourceCompatibility = JVM_TARGET
+                it.targetCompatibility = JVM_TARGET
                 val javaCompiler = toolchainService.compilerFor {
                     it.languageVersion.set(JavaLanguageVersion.of(JAVA_VERSION))
                 }
@@ -194,7 +201,8 @@ class MiniGdxKotlinMppPlugin : Plugin<Project> {
 
         private val COMPILATION_FLAGS = listOf(
             "-opt-in=kotlin.ExperimentalStdlibApi",
-            "-opt-in=kotlinx.serialization.ExperimentalSerializationApi"
+            "-opt-in=kotlinx.serialization.ExperimentalSerializationApi",
+            "-Xexpect-actual-classes"
         )
     }
 }

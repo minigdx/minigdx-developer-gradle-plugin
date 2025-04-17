@@ -7,6 +7,7 @@ import com.github.minigdx.gradle.plugin.internal.MiniGdxException
 import com.github.minigdx.gradle.plugin.internal.MiniGdxException.Companion.ISSUES
 import com.github.minigdx.gradle.plugin.internal.Severity
 import com.github.minigdx.gradle.plugin.internal.Solution
+import org.danilopianini.gradle.mavencentral.PublishOnCentralExtension
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.publish.PublishingExtension
@@ -16,8 +17,8 @@ import org.gradle.jvm.tasks.Jar
 import org.gradle.plugins.signing.SigningExtension
 import org.gradle.util.GradleVersion
 import org.jetbrains.dokka.gradle.DokkaTask
+import org.jetbrains.kotlin.gradle.plugin.extraProperties
 import java.io.File
-import java.net.URI
 
 /**
  * Plugin for developers of MiniGDX project.
@@ -118,28 +119,35 @@ class MiniGdxDeveloperPlugin : Plugin<Project> {
             publication.onlyIf {
                 // publish on sonatype only if the username is configured.
                 (publication.name.startsWith("sonatype") &&
-                    // TODO: [CACHE] Might need to do something about that.
-                    project.properties["sonatype.username"]?.toString()?.isNotBlank() == true) ||
-                    !publication.name.startsWith("sonatype")
+                        // TODO: [CACHE] Might need to do something about that.
+                        project.properties["sonatype.username"]?.toString()?.isNotBlank() == true) ||
+                        !publication.name.startsWith("sonatype")
             }
 
         }
     }
 
     private fun configureDokka(project: Project) {
+        if (project.extraProperties.has(MiniGdxDeveloperExtension.DOKKA_SKIP_PROPERTY)) {
+            return
+        }
         // TODO - [CACHE] Dokka doesn't support Configuration Cache yet
         //      See: https://github.com/Kotlin/dokka/issues/2231
+        project.extensions.extraProperties.set(
+            "org.jetbrains.dokka.experimental.gradle.pluginMode",
+            "V2EnabledWithHelpers"
+        )
         project.apply { it.plugin("org.jetbrains.dokka") }
         project.tasks.register("javadocJar", Jar::class.java) {
             it.dependsOn(project.tasks.getByName("dokkaHtml"))
             it.archiveClassifier.set("javadoc")
-            it.from(project.buildDir.resolve("dokka"))
+            it.from(project.layout.buildDirectory.dir("dokka"))
         }
 
         project.tasks.withType(DokkaTask::class.java).configureEach { dokka ->
             dokka.notCompatibleWithConfigurationCache(
                 "The dokka tasks are not compatible yet " +
-                    "with the configuration cache."
+                        "with the configuration cache."
             )
         }
     }
@@ -147,18 +155,11 @@ class MiniGdxDeveloperPlugin : Plugin<Project> {
     private fun configureProjectRepository(project: Project) {
         project.repositories.mavenCentral()
         project.repositories.google()
-        // Snapshot repository. Select only our snapshot dependencies
-        project.repositories.maven {
-            it.url = URI("https://s01.oss.sonatype.org/content/repositories/snapshots/")
-        }.mavenContent {
-            it.includeVersionByRegex("com.github.minigdx", "(.*)", "LATEST-SNAPSHOT")
-            it.includeVersionByRegex("com.github.minigdx.(.*)", "(.*)", "LATEST-SNAPSHOT")
-        }
         project.repositories.mavenLocal()
     }
 
     private fun configureLinter(project: Project) {
-        if(project.findProperty(MiniGdxDeveloperExtension.KTLINT_PROPERTY) != "false") {
+        if (project.findProperty(MiniGdxDeveloperExtension.KTLINT_PROPERTY) != "false") {
             project.apply { it.plugin("org.jlleitschuh.gradle.ktlint") }
         }
     }
@@ -170,7 +171,7 @@ class MiniGdxDeveloperPlugin : Plugin<Project> {
             gradleVersion = gradleVersion,
             because = "'$filename' file not found in the plugin jar! The plugin might have been incorrectly packaged.",
             description = "The plugin is trying to copy a resource that should has been packaged into the plugin " +
-                "but is not. As this file is required, the plugin will stop.",
+                    "but is not. As this file is required, the plugin will stop.",
             solutions = listOf(Solution("An issue can be reported to the developer", ISSUES))
         )
         target.resolve(File(filename).name).apply {
@@ -196,8 +197,7 @@ class MiniGdxDeveloperPlugin : Plugin<Project> {
                     it.project.mkdir(".github/workflows")
                 }
                 copy(projectName, gradleVersion, "github/workflows/build.yml", target)
-                copy(projectName, gradleVersion,  "github/workflows/publish-release.yml", target)
-                copy(projectName, gradleVersion, "github/workflows/publish-snapshot.yml", target)
+                copy(projectName, gradleVersion, "github/workflows/publish-release.yml", target)
             }
         }
     }
@@ -221,38 +221,27 @@ class MiniGdxDeveloperPlugin : Plugin<Project> {
     }
 
     private fun configureSonatype(project: Project) {
-        if (project.properties["signing.base64.secretKey"] == null) {
-            return
-        }
-        project.apply { it.plugin("org.gradle.signing") }
-        val publications = project.extensions.getByType(PublishingExtension::class.java).publications
-        project.extensions.getByType(PublishingExtension::class.java).repositories {
-            // Configure where to publish
-            it.maven {
-                it.name = "sonatypeStaging"
-                it.setUrl("https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/")
-                it.credentials {
-                    it.username = project.properties["sonatype.username"].toString()
-                    it.password = project.properties["sonatype.password"].toString()
+        project.apply { it.plugin("org.danilopianini.publish-on-central") }
+        project.afterEvaluate {
+            val ext = project.extensions.getByType(MiniGdxDeveloperExtension::class.java)
+            val publishOnCentral = project.extensions.getByType(PublishOnCentralExtension::class.java)
+
+            publishOnCentral.projectDescription.set(ext.description)
+            publishOnCentral.projectUrl.set(ext.projectUrl)
+            publishOnCentral.scmConnection.set(ext.projectUrl.map { url -> "$url/.git" })
+
+            val publications = project.extensions.getByType(PublishingExtension::class.java).publications
+
+            // Add signing extension only if the signing data is available.
+            if (project.properties["signing.base64.secretKey"] != null) {
+                project.extensions.configure(SigningExtension::class.java) {
+                    it.sign(publications)
+                    it.useInMemoryPgpKeys(
+                        project.properties["signing.base64.secretKey"].toString(),
+                        project.properties["signing.password"].toString()
+                    )
                 }
             }
-
-            it.maven {
-                it.name = "sonatypeSnapshots"
-                it.setUrl("https://s01.oss.sonatype.org/content/repositories/snapshots/")
-                it.credentials {
-                    it.username = project.properties["sonatype.username"].toString()
-                    it.password = project.properties["sonatype.password"].toString()
-                }
-            }
-        }
-
-        project.extensions.configure(SigningExtension::class.java) {
-            it.sign(publications)
-            it.useInMemoryPgpKeys(
-                project.properties["signing.base64.secretKey"].toString(),
-                project.properties["signing.password"].toString()
-            )
         }
     }
 
