@@ -14,11 +14,9 @@ import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.publish.PublishingExtension
 import org.gradle.api.publish.maven.MavenPublication
-import org.gradle.api.publish.maven.tasks.PublishToMavenRepository
-import org.gradle.jvm.tasks.Jar
+import org.gradle.plugins.signing.Sign
 import org.gradle.plugins.signing.SigningExtension
 import org.gradle.util.GradleVersion
-import org.jetbrains.dokka.gradle.DokkaTask
 import org.jetbrains.kotlin.gradle.plugin.extraProperties
 import java.io.File
 
@@ -227,6 +225,10 @@ class MiniGdxDeveloperPlugin : Plugin<Project> {
             // Disable the release task for modules without artifacts (root project, for example)
             project.tasks.named(RELEASE_TASK_NAME).configure {
                 it.onlyIf { project.layout.buildDirectory.dir("maven-central-portal").get().asFile.exists() }
+            }
+
+            project.tasks.withType(Sign::class.java) {
+                it.onlyIf { project.properties["signing.base64.secretKey"] != null }
             }
         }
     }
