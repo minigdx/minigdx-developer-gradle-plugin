@@ -11,7 +11,8 @@ jobs:
     steps:
       - name: Checkout latest code
         uses: actions/checkout@v3
-
+      - name: Validate Gradle Wrapper
+        uses: gradle/actions/wrapper-validation@v4
       - name: Setup build cache
         uses: actions/cache@v3
         with:

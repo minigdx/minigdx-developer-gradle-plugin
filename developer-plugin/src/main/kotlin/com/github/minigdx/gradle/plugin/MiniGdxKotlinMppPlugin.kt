@@ -1,5 +1,6 @@
 package com.github.minigdx.gradle.plugin
 
+import com.github.minigdx.gradle.plugin.internal.Constants
 import com.github.minigdx.gradle.plugin.internal.Constants.JAVA_VERSION
 import com.github.minigdx.gradle.plugin.internal.Constants.JVM_TARGET
 import org.gradle.api.Plugin
@@ -11,6 +12,7 @@ import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
 import org.jetbrains.kotlin.gradle.dsl.JsSourceMapEmbedMode
 import org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension
 import org.jetbrains.kotlin.gradle.plugin.KotlinJsCompilerType
+import org.jetbrains.kotlin.gradle.tasks.Kotlin2JsCompile
 import org.jetbrains.kotlin.gradle.tasks.UsesKotlinJavaToolchain
 
 /**
@@ -49,6 +51,9 @@ class MiniGdxKotlinMppPlugin : Plugin<Project> {
                     this.freeCompilerArgs.addAll(COMPILATION_FLAGS)
                     sourceMap.set(true)
                     sourceMapEmbedSources.set(JsSourceMapEmbedMode.SOURCE_MAP_SOURCE_CONTENT_ALWAYS)
+
+                    // See https://github.com/turansky/seskar
+                    freeCompilerArgs.add("-Xir-per-file")
                 }
 
                 this.browser {
@@ -60,16 +65,8 @@ class MiniGdxKotlinMppPlugin : Plugin<Project> {
 
             mpp.jvm {
                 compilerOptions {
-                    compilations.getByName("main").kotlinOptions.apply {
-                        jvmTarget = JVM_TARGET
-                        freeCompilerArgs = freeCompilerArgs + COMPILATION_FLAGS
-                    }
-                    compilations.getByName("test").kotlinOptions.apply {
-                        jvmTarget = JVM_TARGET
-                        freeCompilerArgs = freeCompilerArgs + COMPILATION_FLAGS
-                    }
-
-
+                    jvmTarget.set(Constants.JVM_TARGET)
+                    freeCompilerArgs.addAll(COMPILATION_FLAGS)
                 }
             }
 
@@ -78,7 +75,7 @@ class MiniGdxKotlinMppPlugin : Plugin<Project> {
                 mpp.iosSimulatorArm64()
             }
 
-            if(project.findProperty(MiniGdxDeveloperExtension.WASM_MPP_PROPERTY) == "true") {
+            if (project.findProperty(MiniGdxDeveloperExtension.WASM_MPP_PROPERTY) == "true") {
                 mpp.wasmJs()
                 mpp.wasmWasi()
             }
@@ -166,7 +163,6 @@ class MiniGdxKotlinMppPlugin : Plugin<Project> {
             mpp.sourceSets.all {
                 it.languageSettings.apply {
                     this.optIn("kotlin.ExperimentalStdlibApi")
-                    this.optIn("kotlinx.serialization.ExperimentalSerializationApi")
 
                     if (project.findProperty(MiniGdxDeveloperExtension.K2_MPP_PROPERTY) == "true") {
                         languageVersion = "2.0"
@@ -187,13 +183,21 @@ class MiniGdxKotlinMppPlugin : Plugin<Project> {
             }
 
             project.tasks.withType(JavaCompile::class.java).configureEach {
-                it.sourceCompatibility = JVM_TARGET
-                it.targetCompatibility = JVM_TARGET
+                it.sourceCompatibility = JVM_TARGET.target
+                it.targetCompatibility = JVM_TARGET.target
                 val javaCompiler = toolchainService.compilerFor {
                     it.languageVersion.set(JavaLanguageVersion.of(JAVA_VERSION))
                 }
                 it.javaCompiler.set(javaCompiler)
             }
+
+            // See https://github.com/turansky/seskar?tab=readme-ov-file#kotlinjs-requirements
+            project.tasks.withType(Kotlin2JsCompile::class.java).configureEach {
+                it.compilerOptions {
+                    this.target.set("es2015")
+                }
+            }
+
         }
     }
 
@@ -201,7 +205,6 @@ class MiniGdxKotlinMppPlugin : Plugin<Project> {
 
         private val COMPILATION_FLAGS = listOf(
             "-opt-in=kotlin.ExperimentalStdlibApi",
-            "-opt-in=kotlinx.serialization.ExperimentalSerializationApi",
             "-Xexpect-actual-classes"
         )
     }

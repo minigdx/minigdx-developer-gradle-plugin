@@ -30,8 +30,8 @@ class MiniGdxKotlinJvmPlugin : Plugin<Project> {
         project.afterEvaluate {
             val toolchainService = project.extensions.getByType(JavaToolchainService::class.java)
             project.tasks.withType(JavaCompile::class.java).configureEach {
-                it.sourceCompatibility = JVM_TARGET
-                it.targetCompatibility = JVM_TARGET
+                it.sourceCompatibility = JVM_TARGET.target
+                it.targetCompatibility = JVM_TARGET.target
                 val javaCompiler = toolchainService.compilerFor {
                     it.languageVersion.set(JavaLanguageVersion.of(JAVA_VERSION))
                 }
@@ -99,7 +99,6 @@ class MiniGdxKotlinJvmPlugin : Plugin<Project> {
         private val COMPILATION_FLAGS = listOf(
             "-Xjsr305=strict",
             "-opt-in=kotlin.ExperimentalStdlibApi",
-            "-opt-in=kotlinx.serialization.ExperimentalSerializationApi"
         )
     }
 }
